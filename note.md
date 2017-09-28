@@ -2,6 +2,7 @@ I recently had to fiddle with GPG on the command line. After reading man pages a
 
 # listing keys
 `gpg --list-keys`
+
 `gpg --list-secret-keys`
 
 # generating a key
