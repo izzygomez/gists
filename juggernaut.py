@@ -111,7 +111,7 @@ def calculate_new_working_max(
     # printssss
     print("%s%s:%s" % (format.BOLD, lift_to_string(lift), format.END))
     print(
-        "• New working max is %s%s%d lbs%s."
+        "• New working max is %s%s%.2f lbs%s."
         % (format.GREEN, format.BOLD, new_working_max, format.END)
     )
     print(
