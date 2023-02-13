@@ -111,11 +111,11 @@ def calculate_new_working_max(
     # printssss
     print("%s%s:%s" % (format.BOLD, lift_to_string(lift), format.END))
     print(
-        "\tNew working max is %s%s%d lbs%s."
+        "• New working max is %s%s%d lbs%s."
         % (format.GREEN, format.BOLD, new_working_max, format.END)
     )
     print(
-        "\tWe used the %s%.2f lbs%s %s-increment to increase the old %s%d%s working max with %s%d%s extra reps."
+        "• We used the %s%.2f lbs%s %s-increment to increase the old %s%d%s working max with %s%d%s extra reps."
         % (
             format.CYAN,
             chosen_increment,
@@ -130,7 +130,7 @@ def calculate_new_working_max(
         )
     )
     print(
-        "\tThe percentage difference between the new %s%d%s working max & the %s%0.2f%s projected max is %s%s%s.\n"
+        "• The percentage difference between the new %s%d%s working max & the %s%0.2f%s projected max is %s%s%s.\n"
         % (
             format.GREEN,
             new_working_max,
@@ -163,6 +163,7 @@ press_last_set_weight = None
 dead_working_max = 342
 dead_reps_performed = None
 dead_last_set_weight = None
+
 
 calculate_new_working_max(
     Lift.BENCH,
