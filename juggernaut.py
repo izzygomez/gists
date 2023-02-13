@@ -115,7 +115,7 @@ def calculate_new_working_max(
         % (format.GREEN, format.BOLD, new_working_max, format.END)
     )
     print(
-        "• We used the %s%.2f lbs%s %s-increment to increase the %s%d%s old working max with %s%d%s extra reps."
+        "• We used the %s%.2f lbs%s %s-increment to increase the %s%.2f lb%s old working max with %s%d%s extra reps."
         % (
             format.CYAN,
             chosen_increment,
@@ -128,6 +128,10 @@ def calculate_new_working_max(
             extra_reps,
             format.END,
         )
+    )
+    print(
+        "\t• i.e. did %d reps on last set attempt of %d lbs for %d reps."
+        % (reps_performed, last_set_weight, standard_reps)
     )
     print(
         "• The percentage difference between the new %s%d%s working max & the %s%0.2f%s projected max is %s%s%s.\n"
