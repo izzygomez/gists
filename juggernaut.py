@@ -93,16 +93,20 @@ def calculate_new_working_max(
     # projected max & the big working max & ensure the percentage difference is
     # not less than 5%.
     big_percentage_diff = projected_max / big_working_max
+    small_percentage_diff = projected_max / small_working_max
     # see https://stackoverflow.com/a/8885688 for formatting syntax
-    big_diff_string = "{:.2f}".format((big_percentage_diff - 1) * 100) + "%"
+    big_diff_string = "{:.2f}".format((big_percentage_diff - 1.0) * 100) + "%"
+    small_diff_string = "{:.2f}".format((small_percentage_diff - 1.0) * 100) + "%"
     if big_percentage_diff >= 1.05:
         new_working_max = big_working_max
         chosen_increment = big_increment
         chosen_increment_string = "big"
+        diff_string = big_diff_string
     else:
         new_working_max = small_working_max
         chosen_increment = small_increment
         chosen_increment_string = "small"
+        diff_string = small_diff_string
 
     # printssss
     print("%s%s:%s" % (format.BOLD, lift_to_string(lift), format.END))
@@ -126,7 +130,7 @@ def calculate_new_working_max(
         )
     )
     print(
-        "\tThe percentage difference between the new %s%d%s working max & the %s%d%s projected max is %s%s%s.\n"
+        "\tThe percentage difference between the new %s%d%s working max & the %s%0.2f%s projected max is %s%s%s.\n"
         % (
             format.GREEN,
             new_working_max,
@@ -135,7 +139,7 @@ def calculate_new_working_max(
             projected_max,
             format.END,
             format.BOLD,
-            big_diff_string,
+            diff_string,
             format.END,
         )
     )
