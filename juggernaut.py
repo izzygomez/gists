@@ -1,6 +1,7 @@
 """
 Script to use with Juggernaut workout method to calculate new working maxes
 
+https://gist.github.com/izzygomez/86be40a6c7e5efcc97e613f1d08b9c5b
 """
 
 from enum import Enum
@@ -39,12 +40,16 @@ def lift_to_string(lift):
             return "Deadlift"
 
 
-# https://en.wikipedia.org/wiki/One-repetition_maximum
+# Good resources on topic of 1RM:
+#  - https://en.wikipedia.org/wiki/One-repetition_maximum
+#  - https://observablehq.com/@mourner/one-rep-max-formulas-showdown
+#  - https://www.athlegan.com/calculate-1rm
+
+
 def calc_1rm_epley(weight, reps):
     return weight * (1 + (reps / 30.0))
 
 
-# https://en.wikipedia.org/wiki/One-repetition_maximum
 def calc_1rm_brzycki(weight, reps):
     return weight * (36.0 / (37 - reps))
 
@@ -62,13 +67,12 @@ def calculate_new_working_max(
         last_set_weight: Weight used in last AMAP set in the Realization phase.
     """
     # Note: choosing to use Epley formula since it's a bit more optimistic (i.e.
-    # higher vals) than Brzycki, but this can be adjusted later if increment
-    # velocity brings about last set failure in any wave.
+    # higher vals) than Brzycki, but this can be adjusted later if needed.
     projected_max = calc_1rm_epley(last_set_weight, reps_performed)
 
     # cap extra reps to at most 10
     extra_reps = min(reps_performed - standard_reps, 10)
-    # TODO: figure out what to do if extra_reps < 0
+    # TODO: figure out what to do if extra_reps < 0, i.e. last set
 
     if lift == Lift.BENCH or lift == Lift.PRESS:
         big_increment = 2.5
@@ -93,9 +97,11 @@ def calculate_new_working_max(
     if big_percentage_diff >= 1.05:
         new_working_max = big_working_max
         chosen_increment = big_increment
+        chosen_increment_string = "big"
     else:
         new_working_max = small_working_max
         chosen_increment = small_increment
+        chosen_increment_string = "small"
 
     # printssss
     print("%s%s:%s" % (format.BOLD, lift_to_string(lift), format.END))
@@ -104,11 +110,12 @@ def calculate_new_working_max(
         % (format.GREEN, format.BOLD, new_working_max, format.END)
     )
     print(
-        "\tWe used the %s%.2f lbs%s increment to increase the old %s%d%s working max by %s%d%s extra reps."
+        "\tWe used the %s%.2f lbs%s %s-increment to increase the old %s%d%s working max with %s%d%s extra reps."
         % (
             format.CYAN,
             chosen_increment,
             format.END,
+            chosen_increment_string,
             format.RED,
             working_max,
             format.END,
@@ -133,25 +140,24 @@ def calculate_new_working_max(
     )
 
 
-# Juggernaut calculations
+# Calculate new working maxes
+standard_reps = 8
 
-standard_reps = 10
+bench_working_max = 220
+bench_reps_performed = None
+bench_last_set_weight = None
 
-bench_working_max = 250
-bench_reps_performed = 10
-bench_last_set_weight = 185
+squat_working_max = 315
+squat_reps_performed = None
+squat_last_set_weight = None
 
-squat_working_max = 325
-squat_reps_performed = 12
-squat_last_set_weight = 245
+press_working_max = 108
+press_reps_performed = None
+press_last_set_weight = None
 
-press_working_max = 125
-press_reps_performed = 8
-press_last_set_weight = 95
-
-dead_working_max = 340
-dead_reps_performed = 13
-dead_last_set_weight = 255
+dead_working_max = 342
+dead_reps_performed = None
+dead_last_set_weight = None
 
 calculate_new_working_max(
     Lift.BENCH,
@@ -181,93 +187,3 @@ calculate_new_working_max(
     dead_reps_performed,
     dead_last_set_weight,
 )
-
-"""
-# testing 1RM calculations based on last Juggernaut cycle
-bench_weight = 220
-bench_reps = 4
-squat_weight = 280
-squat_reps = 6
-press_weight = 110
-press_reps = 4
-dead_weight = 295
-dead_reps = 7
-
-print("%s1RM calculations from end of December lifts:%s" % (format.BOLD, format.END))
-
-print("Bench 1RM (based on %dx%d):" % (bench_reps, bench_weight))
-print(
-    "\tEpley: %.2f\n\tBrzycki: %.2f\n"
-    % (
-        calc_1rm_epley(bench_weight, bench_reps),
-        calc_1rm_brzycki(bench_weight, bench_reps),
-    )
-)
-
-print("Squat 1RM (based on %dx%d):" % (squat_reps, squat_weight))
-print(
-    "\tEpley: %.2f\n\tBrzycki: %.2f\n"
-    % (
-        calc_1rm_epley(squat_weight, squat_reps),
-        calc_1rm_brzycki(squat_weight, squat_reps),
-    )
-)
-
-print("Press 1RM (based on %dx%d):" % (press_reps, press_weight))
-print(
-    "\tEpley: %.2f\n\tBrzycki: %.2f\n"
-    % (
-        calc_1rm_epley(press_weight, press_reps),
-        calc_1rm_brzycki(press_weight, press_reps),
-    )
-)
-
-print("Dead 1RM (based on %dx%d):" % (dead_reps, dead_weight))
-print(
-    "\tEpley: %.2f\n\tBrzycki: %.2f\n"
-    % (calc_1rm_epley(dead_weight, dead_reps), calc_1rm_brzycki(dead_weight, dead_reps))
-)
-
-bench_weight = 185
-bench_reps = 10
-squat_weight = 245
-squat_reps = 12
-press_weight = 95
-press_reps = 8
-dead_weight = 255
-dead_reps = 13
-
-print("%s1RM calculations from end of January lifts:%s" % (format.BOLD, format.END))
-print("Bench 1RM (based on %dx%d):" % (bench_reps, bench_weight))
-print(
-    "\tEpley: %.2f\n\tBrzycki: %.2f\n"
-    % (
-        calc_1rm_epley(bench_weight, bench_reps),
-        calc_1rm_brzycki(bench_weight, bench_reps),
-    )
-)
-
-print("Squat 1RM (based on %dx%d):" % (squat_reps, squat_weight))
-print(
-    "\tEpley: %.2f\n\tBrzycki: %.2f\n"
-    % (
-        calc_1rm_epley(squat_weight, squat_reps),
-        calc_1rm_brzycki(squat_weight, squat_reps),
-    )
-)
-
-print("Press 1RM (based on %dx%d):" % (press_reps, press_weight))
-print(
-    "\tEpley: %.2f\n\tBrzycki: %.2f\n"
-    % (
-        calc_1rm_epley(press_weight, press_reps),
-        calc_1rm_brzycki(press_weight, press_reps),
-    )
-)
-
-print("Dead 1RM (based on %dx%d):" % (dead_reps, dead_weight))
-print(
-    "\tEpley: %.2f\n\tBrzycki: %.2f\n"
-    % (calc_1rm_epley(dead_weight, dead_reps), calc_1rm_brzycki(dead_weight, dead_reps))
-)
-"""
