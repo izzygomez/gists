@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.10
 """
 Script to use with Juggernaut workout method to calculate new working maxes
 
@@ -6,7 +7,12 @@ https://gist.github.com/izzygomez/86be40a6c7e5efcc97e613f1d08b9c5b
 """
 
 from enum import Enum
+import sys
 
+
+if sys.version_info < (3, 10):
+    print("Error: This script requires at least Python 3.10 to run.")
+    sys.exit(1)
 
 class Lift(Enum):
     BENCH = 1
@@ -74,6 +80,8 @@ def calculate_new_working_max(
     # cap extra reps to at most 10
     extra_reps = min(reps_performed - standard_reps, 10)
     # TODO: figure out what to do if extra_reps < 0, i.e. failed last set
+    # TODO: figure out what to do if, e.g., you do exactly amount of reps necessary
+    # & working max doesn't move, but now we fall under 5% of project max.
 
     if lift == Lift.BENCH or lift == Lift.PRESS:
         big_increment = 2.5
@@ -149,51 +157,54 @@ def calculate_new_working_max(
     )
 
 
-# Calculate new working maxes
-standard_reps = 8
+def calculate_current_maxes():
+    standard_reps = 8
 
-bench_working_max = 220
-bench_reps_performed = None
-bench_last_set_weight = None
+    bench_working_max = 220
+    bench_reps_performed = 12
+    bench_last_set_weight = 175
 
-squat_working_max = 315
-squat_reps_performed = None
-squat_last_set_weight = None
+    squat_working_max = 315
+    squat_reps_performed = 10
+    squat_last_set_weight = 255
 
-press_working_max = 108
-press_reps_performed = None
-press_last_set_weight = None
+    press_working_max = 108
+    press_reps_performed = 12
+    press_last_set_weight = 85
 
-dead_working_max = 342
-dead_reps_performed = None
-dead_last_set_weight = None
+    dead_working_max = 342
+    dead_reps_performed = 12
+    dead_last_set_weight = 275
+
+    calculate_new_working_max(
+        Lift.BENCH,
+        standard_reps,
+        bench_working_max,
+        bench_reps_performed,
+        bench_last_set_weight,
+    )
+    calculate_new_working_max(
+        Lift.SQUAT,
+        standard_reps,
+        squat_working_max,
+        squat_reps_performed,
+        squat_last_set_weight,
+    )
+    calculate_new_working_max(
+        Lift.PRESS,
+        standard_reps,
+        press_working_max,
+        press_reps_performed,
+        press_last_set_weight,
+    )
+    calculate_new_working_max(
+        Lift.DEAD,
+        standard_reps,
+        dead_working_max,
+        dead_reps_performed,
+        dead_last_set_weight,
+    )
 
 
-calculate_new_working_max(
-    Lift.BENCH,
-    standard_reps,
-    bench_working_max,
-    bench_reps_performed,
-    bench_last_set_weight,
-)
-calculate_new_working_max(
-    Lift.SQUAT,
-    standard_reps,
-    squat_working_max,
-    squat_reps_performed,
-    squat_last_set_weight,
-)
-calculate_new_working_max(
-    Lift.PRESS,
-    standard_reps,
-    press_working_max,
-    press_reps_performed,
-    press_last_set_weight,
-)
-calculate_new_working_max(
-    Lift.DEAD,
-    standard_reps,
-    dead_working_max,
-    dead_reps_performed,
-    dead_last_set_weight,
-)
+if __name__ == "__main__":
+    calculate_current_maxes()
