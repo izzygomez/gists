@@ -1,4 +1,4 @@
-I recently had to fiddle with GPG on the command line. After reading man pages and some Google results, this is a succint summary of commands I think necessary to get started:
+I recently had to fiddle with GPG on the command line. After reading man pages & Google results, this is a succint summary of commands I think necessary to get started:
 
 # listing keys
 `gpg --list-keys`
@@ -8,18 +8,24 @@ I recently had to fiddle with GPG on the command line. After reading man pages a
 # generating a key
 `gpg --gen-key`
 
-remember to save the key password!
+remember to save the key password somewhere!
 
-# encrypt a message into text file
-`gpg --armor --encrypt --recipient <recipient1> --recipient <recipient2> message_to_encrypt.txt`
+# encrypt a message & sign into text file
+`gpg --recipient <recipient-key-id> --local-user <your-signing-key-id> --sign --encrypt --armor --output "encrypted.txt" file-to-encrypt.txt`
 
-which produces file `message_to_encrypt.txt.asc`
+which produces a file `encrypted.txt`
 
 # decrypt file
-`gpg --decrypt message_to_encrypt.txt.asc`
+`gpg --decrypt encrypted.txt`
 
 # export public key into text file
-`gpg --export --armor <email, or other identifier in key listing entry> > my_public_key.asc`
+`gpg --export --armor <key-id> > my-public-key.txt`
+
+# export private key into text file
+`gpg --export-secret-key --armor <key-id> > my-private-key.txt` 
+
+> **Warning**
+> Take care in saving this file safely.
 
 # import some public key
-`gpg --import some_pkey.asc`
+`gpg --import some-key.asc`
