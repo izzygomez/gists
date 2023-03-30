@@ -14,6 +14,7 @@ if sys.version_info < (3, 10):
     print("Error: This script requires at least Python 3.10 to run.")
     sys.exit(1)
 
+
 class Lift(Enum):
     BENCH = 1
     SQUAT = 2
@@ -117,43 +118,18 @@ def calculate_new_working_max(
         diff_string = small_diff_string
 
     # printssss
-    print("%s%s:%s" % (format.BOLD, lift_to_string(lift), format.END))
+    print(f"{format.BOLD}{lift_to_string(lift)}:{format.END}")
     print(
-        "• New working max is %s%s%.2f lbs%s."
-        % (format.GREEN, format.BOLD, new_working_max, format.END)
+        f"• New working max is {format.GREEN}{format.BOLD}{new_working_max:0.2f} lbs{format.END}."
     )
     print(
-        "• We used the %s%.2f lbs%s %s-increment to increase the %s%.2f lb%s old working max with %s%d%s extra reps."
-        % (
-            format.CYAN,
-            chosen_increment,
-            format.END,
-            chosen_increment_string,
-            format.RED,
-            working_max,
-            format.END,
-            format.CYAN,
-            extra_reps,
-            format.END,
-        )
+        f"• We used the {format.CYAN}{chosen_increment:0.2f} lbs{format.END} {chosen_increment_string}-increment to increase the {format.RED}{working_max:0.2f} lb{format.END} old working max with {format.CYAN}{extra_reps}{format.END} extra reps."
     )
     print(
-        "\t• i.e. did %d reps on last set attempt of %d lbs for %d reps."
-        % (reps_performed, last_set_weight, standard_reps)
+        f"\t• i.e. did {reps_performed} reps on last set attempt of {last_set_weight} lbs for {standard_reps} reps."
     )
     print(
-        "• The percentage difference between the new %s%d%s working max & the %s%0.2f%s projected max is %s%s%s.\n"
-        % (
-            format.GREEN,
-            new_working_max,
-            format.END,
-            format.PURPLE,
-            projected_max,
-            format.END,
-            format.BOLD,
-            diff_string,
-            format.END,
-        )
+        f"• The percentage difference between the new {format.GREEN}{new_working_max:0.2f}{format.END} working max & the {format.PURPLE}{projected_max:0.2f}{format.END} projected max is {format.BOLD}{diff_string}{format.END}.\n"
     )
 
 
