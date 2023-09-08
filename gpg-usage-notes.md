@@ -1,7 +1,7 @@
 I recently had to fiddle with GPG on the command line. After reading man pages & Google results, this is a succint summary of commands I think necessary to get started:
 
 # listing keys
-`gpg --list-keys`
+`gpg --list-keys --with-subkey-fingerprint`
 
 `gpg --list-secret-keys`
 
