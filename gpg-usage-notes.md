@@ -20,8 +20,15 @@ Then delete the public key:
 
 `gpg --delete-keys <key-id>`
 
-# Encrypt a message & sign into text file
+# Encrypt (& optionally sign) a message into text file
+
+For encrypting & signing:
+
 `gpg --recipient <recipient-key-id> --recipient <your-key-id> --local-user <your-signing-key-id> --sign --encrypt --armor --output "encrypted.txt" file-to-encrypt.txt`
+
+For encrypting:
+
+`gpg --recipient <recipient-key-id> --recipient <your-key-id> --encrypt --armor --output "encrypted.txt" file-to-encrypt.txt`
 
 Which produces a file `encrypted.txt`. You add yourself as a recipient as well (optionally) in order to also be able to decrypt the encrypted message; got this idea from [here](https://www.youtube.com/watch?v=mE8fL5Fu8x8&t=866s). Think of the use case where you want to be able to read the encrypted emails you've sent.
 
