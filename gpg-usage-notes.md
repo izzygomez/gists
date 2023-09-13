@@ -10,6 +10,16 @@ I recently had to fiddle with GPG on the command line. After reading man pages &
 
 remember to save the key password somewhere!
 
+# deleting a key
+
+if you have both the corresponding private & public key, delete the private key first:
+
+`gpg --delete-secret-keys <key-id>`
+
+then delete the public key:
+
+`gpg --delete-keys <key-id>`
+
 # encrypt a message & sign into text file
 `gpg --recipient <recipient-key-id> --local-user <your-signing-key-id> --sign --encrypt --armor --output "encrypted.txt" file-to-encrypt.txt`
 
