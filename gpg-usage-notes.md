@@ -1,18 +1,18 @@
-I recently had to fiddle with GPG on the command line. After reading man pages & Google results, this is a succint summary of commands I think necessary to get started:
-
 # Listing keys
+
 `gpg --list-keys --with-subkey-fingerprint`
 
 `gpg --list-secret-keys`
 
 # Generating a key
-`gpg --gen-key`
 
-Remember to save the key password somewhere!
+`gpg --full-gen-key`
+
+Remember to save the key password somewhere safe!
 
 # Deleting a key
 
-If you have both the corresponding private & public key, delete the private key first:
+If your keychain has both private & public keys, delete the private key first:
 
 `gpg --delete-secret-keys <key-id>`
 
@@ -20,15 +20,15 @@ Then delete the public key:
 
 `gpg --delete-keys <key-id>`
 
-# Encrypt (& optionally sign) a message into text file
+# Encrypt & (optionally) sign a message into text file
 
 For encrypting & signing:
 
-`gpg --recipient <recipient-key-id> --recipient <your-key-id> --local-user <your-key-id> --sign --encrypt --armor --output "encrypted.txt" file-to-encrypt.txt`
+`gpg --recipient <recipient-key-id> --recipient <your-key-id> --local-user <your-key-id> --sign --encrypt --armor --output encrypted.txt file-to-encrypt.txt`
 
 For encrypting:
 
-`gpg --recipient <recipient-key-id> --recipient <your-key-id> --encrypt --armor --output "encrypted.txt" file-to-encrypt.txt`
+`gpg --recipient <recipient-key-id> --recipient <your-key-id> --encrypt --armor --output encrypted.txt file-to-encrypt.txt`
 
 Which produces a file `encrypted.txt`. Per `man gpg`, note that `--local-user` specifies what key to use for signing. You add yourself as a recipient as well, optionally, in order to also be able to decrypt the encrypted message; got this idea from [here](https://www.youtube.com/watch?v=mE8fL5Fu8x8&t=866s). Think of the use case where you want to be able to read the encrypted emails you've sent.
 
