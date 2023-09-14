@@ -19,7 +19,7 @@
 #   - Commit new changes: `git add . && git commit -m "Split ORIGINAL-FILE &
 #     NEW-FILE definitions"`
 #   - Push changes to remote directory: `git push`
-#   - Verify history & blame looks correct on remote repo, like Github.com. 
+#   - Verify history & blame looks correct on remote repo, like Github.com.
 #
 #
 # * For example, if ORIGINAL-FILE was a file that contained definitions for two
@@ -42,12 +42,12 @@ fi
 GIST_LINK="https://gist.github.com/izzygomez/c4efca57c2237277e3f725b612608b6b"
 
 git mv "$1" "$2"
-git commit -n -m "[Tool Commit] Split history $1 to $2 - rename original-file to new-file\n\nSee: $GIST_LINK"
+git commit -n -m "[Tool Commit] Split history $1 to $2 - rename original-file to new-file" -m "See: $GIST_LINK"
 REV=`git rev-parse HEAD`
 git reset --hard HEAD^
 git mv "$1" temp
-git commit -n -m "[Tool Commit] Split history $1 to $2 - rename original-file to temp\n\nSee: $GIST_LINK"
+git commit -n -m "[Tool Commit] Split history $1 to $2 - rename original-file to temp" -m "See: $GIST_LINK"
 git merge $REV
-git commit -a -n -m "[Tool Commit] Split history $1 to $2 - resolve conflict and keep both files\n\nSee: $GIST_LINK"
+git commit -a -n -m "[Tool Commit] Split history $1 to $2 - resolve conflict and keep both files" -m "See: $GIST_LINK"
 git mv temp "$1"
-git commit -n -m "[Tool Commit] Split history $1 to $2 - restore name of original-file\n\nSee: $GIST_LINK"
+git commit -n -m "[Tool Commit] Split history $1 to $2 - restore name of original-file" -m "See: $GIST_LINK"
