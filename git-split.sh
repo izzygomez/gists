@@ -19,14 +19,14 @@
 #   - Commit new changes: `git add . && git commit -m "Split ORIGINAL-FILE &
 #     NEW-FILE definitions"`
 #   - Push changes to remote directory: `git push`
-#   - Verify history & blame looks correct on remote repo, like Github.com.
+#   - Verify history & blame looks correct on remote repo (e.g. on Github.com).
 #
 #
 # * For example, if ORIGINAL-FILE was a file that contained definitions for two
-#   classes A & B, & the refactor is to split these into separate files, then
-#   ORIGINAL-FILE should have class B's definition deleted & NEW-FILE should
-#   have class A's definition deleted. Put differently, the state of file
-#   contents should be the following:
+#   classes A & B, & the refactor is to split these classes into separate files,
+#   then ORIGINAL-FILE should delete class B's definition & NEW-FILE should
+#   delete class A's definition. Put differently, the state of files & file
+#   contents should have the following transformation:
 #
 #   { ORIGINAL-FILE: {A, B} } ==> { ORIGINAL-FILE: {A}, NEW-FILE: {B} }
 #
