@@ -160,7 +160,6 @@ def calculate_new_working_max(
 
     # cap extra reps to at most 10
     extra_reps = min(reps_performed - standard_reps, 10)
-    # TODO: figure out what to do if extra_reps < 0, i.e. failed last set
 
     if lift == Lift.BENCH or lift == Lift.PRESS:
         big_increment = 2.5
