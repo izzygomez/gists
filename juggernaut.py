@@ -7,9 +7,9 @@ https://gist.github.com/izzygomez/86be40a6c7e5efcc97e613f1d08b9c5b
 """
 
 from enum import Enum
-import textwrap
 import re
 import sys
+import textwrap
 
 
 if sys.version_info < (3, 10):
