@@ -7,6 +7,8 @@ https://gist.github.com/izzygomez/86be40a6c7e5efcc97e613f1d08b9c5b
 """
 
 from enum import Enum
+import textwrap
+import re
 import sys
 
 
@@ -62,6 +64,84 @@ def calc_1rm_brzycki(weight, reps):
     return weight * (36.0 / (37 - reps))
 
 
+def diff_to_string(diff):
+    # See https://stackoverflow.com/a/8885688 for formatting syntax
+    return "{:.2f}".format((diff - 1.0) * 100) + "%"
+
+
+def round_to_base(x, base=2.5, prec=2):
+    """Round to nearest multiple of base.
+
+    Args:
+        x: Number to round.
+        base: Base to round to.
+        prec: Precision to round to. Defaults to 2.
+    """
+    return round(base * round(float(x) / base), prec)
+
+
+def wrap_text_with_new_lines(paragraphs, max_line_len):
+    """Wrap paragraphs of text with new lines using textwrap.
+
+    Args:
+        paragraphs: List of paragraphs to wrap. Each paragraph is a string.
+                    Strings should not contain "^" character; see note below.
+        max_line_len: Max line length to wrap to.
+
+    Note: this function was created using ChatGPT so might be a bit convoluted,
+    but the general idea is to extract ANSI codes (i.e. color codes) from the
+    paragraphs, wrap the paragraphs, then reinsert the ANSI codes. This is done
+    since textwrap doesn't handle ANSI codes well (i.e. it doesn't know that the
+    codes shouldn't be counted towards the max line length), so we temporarily
+    replace the ANSI codes with a placeholder character "^" before wrapping the
+    text. This is why the paragraphs should not contain the "^" character.
+    """
+    blank_char = " "
+    wrapped_paragraphs = []
+
+    for i in range(len(paragraphs)):
+        paragraph = paragraphs[i]
+
+        # Extract ANSI codes and replace them with placeholder "^"
+        ansi_codes = []
+        clean_paragraph = ""
+        j = 0
+        while j < len(paragraph):
+            match = re.match(r"\033\[[0-9;]*[m]", paragraph[j:])
+            if match:
+                ansi_codes.append(match.group())
+                clean_paragraph += "^"
+                j += len(match.group())
+            else:
+                clean_paragraph += paragraph[j]
+                j += 1
+
+        # First line is special case since we don't want indentation.
+        if i == 0:
+            wrapped_text = textwrap.fill(clean_paragraph, width=max_line_len)
+        else:  # Subsequent lines should use indentation
+            wrapped_text = textwrap.fill(
+                clean_paragraph,
+                width=max_line_len,
+                initial_indent=blank_char * 2,  # indent bullet points
+                subsequent_indent=blank_char * 4,  # further indent when wrapped
+            )
+
+        # Reinsert the ANSI codes sequentially
+        final_text = ""
+        ansi_index = 0
+        for char in wrapped_text:
+            if char == "^":
+                final_text += ansi_codes[ansi_index]
+                ansi_index += 1
+            else:
+                final_text += char
+
+        wrapped_paragraphs.append(final_text)
+
+    return "\n".join(wrapped_paragraphs)
+
+
 def calculate_new_working_max(
     lift, standard_reps, working_max, reps_performed, last_set_weight
 ):
@@ -81,8 +161,6 @@ def calculate_new_working_max(
     # cap extra reps to at most 10
     extra_reps = min(reps_performed - standard_reps, 10)
     # TODO: figure out what to do if extra_reps < 0, i.e. failed last set
-    # TODO: figure out what to do if, e.g., you do exactly amount of reps necessary
-    # & working max doesn't move, but now we fall under 5% of project max.
 
     if lift == Lift.BENCH or lift == Lift.PRESS:
         big_increment = 2.5
@@ -99,58 +177,86 @@ def calculate_new_working_max(
 
     # As a general rule of thumb, we want the new working max to stay 5-10%
     # below the project max. We therefore calculate the ratio between the
-    # projected max & the big working max & ensure the percentage difference is
-    # not less than 5%.
+    # projected max & the big/small working maxes & ensure the percentage
+    # difference is not less than 5%. If both are less than 5%, we calculate the
+    # new working max by forcing a 7.5% difference to the projected max (& round
+    # to nearest multiple of small_increment).
     big_percentage_diff = projected_max / big_working_max
     small_percentage_diff = projected_max / small_working_max
-    # see https://stackoverflow.com/a/8885688 for formatting syntax
-    big_diff_string = "{:.2f}".format((big_percentage_diff - 1.0) * 100) + "%"
-    small_diff_string = "{:.2f}".format((small_percentage_diff - 1.0) * 100) + "%"
     if big_percentage_diff >= 1.05:
         new_working_max = big_working_max
         chosen_increment = big_increment
         chosen_increment_string = "big"
-        diff_string = big_diff_string
-    else:
+        diff_string = diff_to_string(big_percentage_diff)
+    elif small_percentage_diff >= 1.05:
         new_working_max = small_working_max
         chosen_increment = small_increment
         chosen_increment_string = "small"
-        diff_string = small_diff_string
+        diff_string = diff_to_string(small_percentage_diff)
+    else:
+        new_working_max = round_to_base(projected_max / 1.075, small_increment)
+        chosen_increment = None
+        diff_string = diff_to_string(projected_max / new_working_max)
 
-    # printssss
-    print(f"{format.BOLD}{lift_to_string(lift)}:{format.END}")
-    print(
-        f"• New working max is {format.GREEN}{format.BOLD}{new_working_max:0.2f} lbs{format.END}."
+    # Prints
+    paragraphs = []
+
+    paragraphs.append(f"{format.BOLD}{lift_to_string(lift)}:{format.END}")
+    paragraphs.append(
+        f"• New working max is "
+        f"{format.GREEN}{format.BOLD}{new_working_max:0.2f} lbs{format.END}."
     )
-    print(
-        f"• We used the {format.CYAN}{chosen_increment:0.2f} lbs{format.END} {chosen_increment_string}-increment to increase the {format.RED}{working_max:0.2f} lb{format.END} old working max with {format.CYAN}{extra_reps}{format.END} extra reps."
+
+    if chosen_increment is None:
+        paragraphs.append(
+            f"• Both increment options were insufficient when updating the "
+            f"{format.RED}{working_max:0.2f} lb{format.END} old working max "
+            f"(with {format.CYAN}{extra_reps} extra reps{format.END}) to "
+            f"stay within 5-10% under projected max, so setting new working "
+            f"max to be ~7.5% under (rounded to nearest "
+            f"{format.CYAN}{small_increment:0.2f} lbs{format.END})."
+        )
+    else:
+        paragraphs.append(
+            f"• We used the "
+            f"{format.CYAN}{chosen_increment:0.2f} lbs{format.END} "
+            f"{chosen_increment_string}-increment to increase the "
+            f"{format.RED}{working_max:0.2f} lb{format.END} old working max "
+            f"(with {format.CYAN}{extra_reps} extra reps{format.END}), "
+            f"i.e. did {format.CYAN}{reps_performed} reps{format.END} "
+            f"on last set when attempting {format.CYAN}{standard_reps} "
+            f"reps{format.END} of {format.CYAN}{last_set_weight} "
+            f"lbs{format.END}."
+        )
+
+    paragraphs.append(
+        f"• The percentage difference between the new "
+        f"{format.GREEN}{new_working_max:0.2f} lbs{format.END} working max & "
+        f"the {format.PURPLE}{projected_max:0.2f} lbs{format.END} projected "
+        f"max is {format.BOLD}{diff_string}{format.END}."
     )
-    print(
-        f"\t• i.e. did {reps_performed} reps on last set attempt of {last_set_weight} lbs for {standard_reps} reps."
-    )
-    print(
-        f"• The percentage difference between the new {format.GREEN}{new_working_max:0.2f}{format.END} working max & the {format.PURPLE}{projected_max:0.2f}{format.END} projected max is {format.BOLD}{diff_string}{format.END}.\n"
-    )
+
+    print(wrap_text_with_new_lines(paragraphs, max_line_len=100), "\n")
 
 
 def calculate_current_maxes():
     standard_reps = 8
 
-    bench_working_max = 220
-    bench_reps_performed = 12
-    bench_last_set_weight = 175
+    bench_working_max = 230
+    bench_reps_performed = 10
+    bench_last_set_weight = 185
 
-    squat_working_max = 315
+    squat_working_max = 320
     squat_reps_performed = 10
     squat_last_set_weight = 255
 
-    press_working_max = 108
-    press_reps_performed = 12
-    press_last_set_weight = 85
+    press_working_max = 113
+    press_reps_performed = 10
+    press_last_set_weight = 90
 
-    dead_working_max = 342
-    dead_reps_performed = 12
-    dead_last_set_weight = 275
+    dead_working_max = 362
+    dead_reps_performed = 10
+    dead_last_set_weight = 290
 
     calculate_new_working_max(
         Lift.BENCH,
