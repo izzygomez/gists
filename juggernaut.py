@@ -85,6 +85,7 @@ def update_method_to_increment_string(update_method):
         case _:
             return "ERROR"
 
+
 def round_to_base(x, base=2.5, prec=2):
     """Round to nearest multiple of base.
 
