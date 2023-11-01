@@ -24,6 +24,13 @@ class Lift(Enum):
     DEAD = 4
 
 
+class WorkingMaxUpdateMethod(Enum):
+    BIG_INCREMENT = 1
+    SMALL_INCREMENT = 2
+    STAY_SAME = 3
+    FORCE_PERCENTAGE_DIFF = 4
+
+
 # From https://stackoverflow.com/a/17303428
 class format:
     PURPLE = "\033[95m"
@@ -68,6 +75,15 @@ def diff_to_string(diff):
     # See https://stackoverflow.com/a/8885688 for formatting syntax
     return "{:.2f}".format((diff - 1.0) * 100) + "%"
 
+
+def update_method_to_increment_string(update_method):
+    match update_method:
+        case WorkingMaxUpdateMethod.BIG_INCREMENT:
+            return "big-increment"
+        case WorkingMaxUpdateMethod.SMALL_INCREMENT:
+            return "small-increment"
+        case _:
+            return "ERROR"
 
 def round_to_base(x, base=2.5, prec=2):
     """Round to nearest multiple of base.
@@ -174,26 +190,36 @@ def calculate_new_working_max(
     big_working_max = working_max + extra_reps * big_increment
     small_working_max = working_max + extra_reps * small_increment
 
-    # As a general rule of thumb, we want the new working max to stay 5-10%
-    # below the project max. We therefore calculate the ratio between the
+    # As a general rule of thumb, we want the new working max to stay at least
+    # 5% below the projected max. We therefore calculate the ratio between the
     # projected max & the big/small working maxes & ensure the percentage
-    # difference is not less than 5%. If both are less than 5%, we calculate the
-    # new working max by forcing a 7.5% difference to the projected max (& round
-    # to nearest multiple of small_increment).
+    # difference is not less than 5%. If both are less than 5% — i.e. neither
+    # increment option will yield a sufficiently small working max relative to
+    # the projected max - we first optimistically check if we can keep the
+    # working max the same. If not, then we calculate the new working max by
+    # forcing a 7.5% difference to the projected max (& round to nearest
+    # multiple of small_increment).
     big_percentage_diff = projected_max / big_working_max
     small_percentage_diff = projected_max / small_working_max
+    current_percentage_diff = projected_max / working_max
     if big_percentage_diff >= 1.05:
         new_working_max = big_working_max
+        update_method = WorkingMaxUpdateMethod.BIG_INCREMENT
         chosen_increment = big_increment
-        chosen_increment_string = "big"
         diff_string = diff_to_string(big_percentage_diff)
     elif small_percentage_diff >= 1.05:
         new_working_max = small_working_max
+        update_method = WorkingMaxUpdateMethod.SMALL_INCREMENT
         chosen_increment = small_increment
-        chosen_increment_string = "small"
         diff_string = diff_to_string(small_percentage_diff)
+    elif current_percentage_diff >= 1.05:
+        new_working_max = working_max
+        update_method = WorkingMaxUpdateMethod.STAY_SAME
+        chosen_increment = None
+        diff_string = diff_to_string(current_percentage_diff)
     else:
         new_working_max = round_to_base(projected_max / 1.075, small_increment)
+        update_method = WorkingMaxUpdateMethod.FORCE_PERCENTAGE_DIFF
         chosen_increment = None
         diff_string = diff_to_string(projected_max / new_working_max)
 
@@ -206,22 +232,30 @@ def calculate_new_working_max(
         f"{format.GREEN}{format.BOLD}{new_working_max:0.2f} lbs{format.END}."
     )
 
-    if chosen_increment is None:
+    if update_method == WorkingMaxUpdateMethod.STAY_SAME:
         paragraphs.append(
             f"• Both increment options were insufficient when updating the "
             f"{format.RED}{working_max:0.2f} lb{format.END} old working max "
             f"(with {format.CYAN}{extra_reps} extra reps{format.END}) to "
-            f"stay within 5-10% under projected max, so setting new working "
-            f"max to be ~7.5% under (rounded to nearest "
+            f"stay >=5% under projected max, but the old working max stays "
+            f"within bounds, so keeping it the same."
+        )
+    elif update_method == WorkingMaxUpdateMethod.FORCE_PERCENTAGE_DIFF:
+        paragraphs.append(
+            f"• Both increment options were insufficient when updating the "
+            f"{format.RED}{working_max:0.2f} lb{format.END} old working max "
+            f"(with {format.CYAN}{extra_reps} extra reps{format.END}) to "
+            f"stay >=5% under projected max, so setting new working max to be "
+            f"~7.5% under (rounded to nearest "
             f"{format.CYAN}{small_increment:0.2f} lbs{format.END})."
         )
     else:
         paragraphs.append(
             f"• We used the "
             f"{format.CYAN}{chosen_increment:0.2f} lbs{format.END} "
-            f"{chosen_increment_string}-increment to increase the "
-            f"{format.RED}{working_max:0.2f} lb{format.END} old working max "
-            f"(with {format.CYAN}{extra_reps} extra reps{format.END}), "
+            f"{update_method_to_increment_string(update_method)} to increase "
+            f"the {format.RED}{working_max:0.2f} lb{format.END} old working "
+            f"max (with {format.CYAN}{extra_reps} extra reps{format.END}), "
             f"i.e. did {format.CYAN}{reps_performed} reps{format.END} "
             f"on last set when attempting {format.CYAN}{standard_reps} "
             f"reps{format.END} of {format.CYAN}{last_set_weight} "
@@ -239,23 +273,23 @@ def calculate_new_working_max(
 
 
 def calculate_current_maxes():
-    standard_reps = 8
+    standard_reps = 5
 
-    bench_working_max = 230
-    bench_reps_performed = 10
-    bench_last_set_weight = 185
+    bench_working_max = 232.5
+    bench_reps_performed = 7
+    bench_last_set_weight = 200
 
-    squat_working_max = 320
-    squat_reps_performed = 10
-    squat_last_set_weight = 255
+    squat_working_max = 317.5
+    squat_reps_performed = 9
+    squat_last_set_weight = 270
 
-    press_working_max = 113
-    press_reps_performed = 10
+    press_working_max = 111.25
+    press_reps_performed = 9
     press_last_set_weight = 90
 
-    dead_working_max = 362
-    dead_reps_performed = 10
-    dead_last_set_weight = 290
+    dead_working_max = 367
+    dead_reps_performed = 8
+    dead_last_set_weight = 315
 
     calculate_new_working_max(
         Lift.BENCH,
