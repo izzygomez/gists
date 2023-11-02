@@ -44,5 +44,5 @@ Which produces a file `encrypted.txt`. Per `man gpg`, note that `--local-user` s
 > **Warning**
 > Take care in saving this file safely.
 
-# Import some public key
+# Import some public or private key
 `gpg --import some-key.asc`
