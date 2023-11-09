@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.10
 """
-Script to use with Juggernaut workout method to calculate new working maxes
+Script to use with The Juggernaut Method™ weightlifting program to calculate new
+working maxes.
 
 Significant changes done to this script should be reflected on:
 https://gist.github.com/izzygomez/86be40a6c7e5efcc97e613f1d08b9c5b
