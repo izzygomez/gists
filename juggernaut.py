@@ -199,7 +199,7 @@ def calculate_new_working_max(
     # increment option will yield a sufficiently small working max relative to
     # the projected max - we first optimistically check if we can keep the
     # working max the same. If not, then we calculate the new working max by
-    # forcing a 7.5% difference to the projected max (& round to nearest
+    # forcing a 5% difference to the projected max (& round to nearest
     # multiple of small_increment).
     big_percentage_diff = projected_max / big_working_max
     small_percentage_diff = projected_max / small_working_max
@@ -220,7 +220,7 @@ def calculate_new_working_max(
         chosen_increment = None
         diff_string = diff_to_string(current_percentage_diff)
     else:
-        new_working_max = round_to_base(projected_max / 1.075, small_increment)
+        new_working_max = round_to_base(projected_max / 1.05, small_increment)
         update_method = WorkingMaxUpdateMethod.FORCE_PERCENTAGE_DIFF
         chosen_increment = None
         diff_string = diff_to_string(projected_max / new_working_max)
@@ -248,7 +248,7 @@ def calculate_new_working_max(
             f"{format.RED}{working_max:0.2f} lb{format.END} old working max "
             f"(with {format.CYAN}{extra_reps} extra reps{format.END}) to "
             f"stay >=5% under projected max, so setting new working max to be "
-            f"~7.5% under (rounded to nearest "
+            f"~5% under (rounded to nearest "
             f"{format.CYAN}{small_increment:0.2f} lbs{format.END})."
         )
     else:
@@ -275,23 +275,25 @@ def calculate_new_working_max(
 
 
 def calculate_current_maxes():
-    standard_reps = 5
+    standard_reps = 3
 
     bench_working_max = 232.5
-    bench_reps_performed = 7
-    bench_last_set_weight = 200
+    bench_reps_performed = 6
+    bench_last_set_weight = 210
 
-    squat_working_max = 317.5
-    squat_reps_performed = 9
-    squat_last_set_weight = 270
+    '''
+    squat_working_max = 335
+    squat_reps_performed = 13
+    squat_last_set_weight = 255
+    '''
 
-    press_working_max = 111.25
-    press_reps_performed = 9
-    press_last_set_weight = 90
+    press_working_max = 118.75
+    press_reps_performed = 8
+    press_last_set_weight = 105
 
-    dead_working_max = 367
-    dead_reps_performed = 8
-    dead_last_set_weight = 315
+    dead_working_max = 377.5
+    dead_reps_performed = 4
+    dead_last_set_weight = 340
 
     calculate_new_working_max(
         Lift.BENCH,
@@ -300,6 +302,7 @@ def calculate_current_maxes():
         bench_reps_performed,
         bench_last_set_weight,
     )
+    '''
     calculate_new_working_max(
         Lift.SQUAT,
         standard_reps,
@@ -307,6 +310,7 @@ def calculate_current_maxes():
         squat_reps_performed,
         squat_last_set_weight,
     )
+    '''
     calculate_new_working_max(
         Lift.PRESS,
         standard_reps,
