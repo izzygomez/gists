@@ -12,8 +12,7 @@
 #   - From clean working directory in your `main` branch, create a new splitting
 #     branch: `git checkout -b split-NEW-FILE-from-ORIGINAL-FILE`
 #   - Run this script: `git-split.sh ORIGINAL-FILE NEW-FILE`
-#   - Verify `git log` shows all "[Tool commit]" commits created through from
-#     script below.
+#   - Verify `git log` shows all "[Tool commit]" commits created in this script.
 #   - Edit ORIGINAL-FILE & NEW-FILE to only contain contents they should now
 #     contain*.
 #   - Commit new changes: `git add . && git commit -m "Split ORIGINAL-FILE &
@@ -34,7 +33,7 @@
 # [1] https://stackoverflow.com/a/53849651
 # [2] https://stackoverflow.com/a/53849613
 
-if [[ $# -ne 2 ]] ; then
+if [[ $# -ne 2 ]]; then
     echo "Usage: git-split.sh original-file new-file"
     exit 0
 fi
@@ -43,7 +42,7 @@ GIST_LINK="https://gist.github.com/izzygomez/c4efca57c2237277e3f725b612608b6b"
 
 git mv "$1" "$2"
 git commit -n -m "[Tool Commit] Split history $1 to $2 - rename original-file to new-file" -m "See: $GIST_LINK"
-REV=`git rev-parse HEAD`
+REV=$(git rev-parse HEAD)
 git reset --hard HEAD^
 git mv "$1" temp
 git commit -n -m "[Tool Commit] Split history $1 to $2 - rename original-file to temp" -m "See: $GIST_LINK"
