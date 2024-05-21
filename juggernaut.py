@@ -275,56 +275,60 @@ def calculate_new_working_max(
 
 
 def calculate_current_maxes():
-    standard_reps = 3
+    standard_reps = 10
 
-    bench_working_max = 232.5
-    bench_reps_performed = 6
-    bench_last_set_weight = 210
+    calc_bench = True
+    calc_squat = False
+    calc_press = True
+    calc_dead = False
 
-    '''
-    squat_working_max = 335
-    squat_reps_performed = 13
-    squat_last_set_weight = 255
-    '''
+    if calc_bench:
+        bench_working_max = 240
+        bench_reps_performed = 13
+        bench_last_set_weight = 180
+        calculate_new_working_max(
+            Lift.BENCH,
+            standard_reps,
+            bench_working_max,
+            bench_reps_performed,
+            bench_last_set_weight,
+        )
 
-    press_working_max = 118.75
-    press_reps_performed = 8
-    press_last_set_weight = 105
+    if calc_squat:
+        squat_working_max = 0
+        squat_reps_performed = 0
+        squat_last_set_weight = 0
+        calculate_new_working_max(
+            Lift.SQUAT,
+            standard_reps,
+            squat_working_max,
+            squat_reps_performed,
+            squat_last_set_weight,
+        )
 
-    dead_working_max = 377.5
-    dead_reps_performed = 4
-    dead_last_set_weight = 340
+    if calc_press:
+        press_working_max = 125
+        press_reps_performed = 11
+        press_last_set_weight = 95
+        calculate_new_working_max(
+            Lift.PRESS,
+            standard_reps,
+            press_working_max,
+            press_reps_performed,
+            press_last_set_weight,
+        )
 
-    calculate_new_working_max(
-        Lift.BENCH,
-        standard_reps,
-        bench_working_max,
-        bench_reps_performed,
-        bench_last_set_weight,
-    )
-    '''
-    calculate_new_working_max(
-        Lift.SQUAT,
-        standard_reps,
-        squat_working_max,
-        squat_reps_performed,
-        squat_last_set_weight,
-    )
-    '''
-    calculate_new_working_max(
-        Lift.PRESS,
-        standard_reps,
-        press_working_max,
-        press_reps_performed,
-        press_last_set_weight,
-    )
-    calculate_new_working_max(
-        Lift.DEAD,
-        standard_reps,
-        dead_working_max,
-        dead_reps_performed,
-        dead_last_set_weight,
-    )
+    if calc_dead:
+        dead_working_max = 377.5
+        dead_reps_performed = 4
+        dead_last_set_weight = 340
+        calculate_new_working_max(
+            Lift.DEAD,
+            standard_reps,
+            dead_working_max,
+            dead_reps_performed,
+            dead_last_set_weight,
+        )
 
 
 if __name__ == "__main__":
