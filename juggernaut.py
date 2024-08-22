@@ -247,8 +247,9 @@ def calculate_new_working_max(
             f"• Both increment options were insufficient when updating the "
             f"{format.RED}{working_max:0.2f} lb{format.END} old working max "
             f"(with {format.CYAN}{extra_reps} extra reps{format.END}) to "
-            f"stay >=5% under projected max, so setting new working max to be "
-            f"~5% under (rounded to nearest "
+            f"stay >=5% under projected max, & old working max does not stay "
+            f"within bounds, so setting new working max to be ~5% under "
+            f"(rounded to nearest "
             f"{format.CYAN}{small_increment:0.2f} lbs{format.END})."
         )
     else:
@@ -275,17 +276,17 @@ def calculate_new_working_max(
 
 
 def calculate_current_maxes():
-    standard_reps = 10
+    standard_reps = 5
 
     calc_bench = True
     calc_squat = False
     calc_press = True
-    calc_dead = False
+    calc_dead = True
 
     if calc_bench:
-        bench_working_max = 240
-        bench_reps_performed = 13
-        bench_last_set_weight = 180
+        bench_working_max = 235
+        bench_reps_performed = 5
+        bench_last_set_weight = 200
         calculate_new_working_max(
             Lift.BENCH,
             standard_reps,
@@ -307,9 +308,9 @@ def calculate_current_maxes():
         )
 
     if calc_press:
-        press_working_max = 125
-        press_reps_performed = 11
-        press_last_set_weight = 95
+        press_working_max = 126.25
+        press_reps_performed = 6
+        press_last_set_weight = 110
         calculate_new_working_max(
             Lift.PRESS,
             standard_reps,
@@ -320,8 +321,8 @@ def calculate_current_maxes():
 
     if calc_dead:
         dead_working_max = 377.5
-        dead_reps_performed = 4
-        dead_last_set_weight = 340
+        dead_reps_performed = 6
+        dead_last_set_weight = 320
         calculate_new_working_max(
             Lift.DEAD,
             standard_reps,
