@@ -8,6 +8,9 @@ Prints "HR Intensities for Standard Marathon Training Workouts" table from
 "Advanced Marathoning" book by Pfitzinger & Douglas (Page 17, Table 1.2). Usage
 described by `python pfitz_hr_ranges.py --help`.
 
+Any changes to this file should be reflected at:
+https://gist.github.com/izzygomez/bbdb012385f511879da62914318078fb
+
 Dependencies: `pip install pandas tabulate`
 """
 
