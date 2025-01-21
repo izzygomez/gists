@@ -41,12 +41,12 @@ fi
 GIST_LINK="https://gist.github.com/izzygomez/c4efca57c2237277e3f725b612608b6b"
 
 git mv "$1" "$2"
-git commit -n -m "[Tool Commit] Split history $1 to $2 - rename original-file to new-file" -m "See: $GIST_LINK"
+git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to new-file" -m "See: $GIST_LINK"
 REV=$(git rev-parse HEAD)
 git reset --hard HEAD^
 git mv "$1" temp
-git commit -n -m "[Tool Commit] Split history $1 to $2 - rename original-file to temp" -m "See: $GIST_LINK"
+git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to temp" -m "See: $GIST_LINK"
 git merge $REV
-git commit -a -n -m "[Tool Commit] Split history $1 to $2 - resolve conflict and keep both files" -m "See: $GIST_LINK"
+git commit -a -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - resolve conflict and keep both files" -m "See: $GIST_LINK"
 git mv temp "$1"
-git commit -n -m "[Tool Commit] Split history $1 to $2 - restore name of original-file" -m "See: $GIST_LINK"
+git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - restore name of original-file" -m "See: $GIST_LINK"
