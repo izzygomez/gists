@@ -1,9 +1,10 @@
 """
 Get precise average splits (min/mi) to complete various race distances in a
-given time.
+given time. Supports 5k, 10k, 15k, 10M, HM, FM distances.
 
 Usage:
     python exact-race-splits.py -t <time> -d <distance> 
+    python exact-race-splits.py -h
 
 Significant changes done to this script should be reflected on:
 https://gist.github.com/izzygomez/22532b2e0b6a7ce1c481d2dda65c82e6
@@ -24,7 +25,7 @@ def valid_time_format(value):
 
 def _distance_to_miles(distance: str) -> float:
     # 1 mile is exactly 1,609.344 metres [1].
-    # Therefore, 1 mile / 1.609344 =  0.621371192 mile/km
+    # Therefore, 1 mile / 1.609344 km =  0.621371192 mile/km
     # The half marathon distance is exactly 21.0975 km [2].
     # Marathon is obviously exactly double that [3].
     # [1] https://en.wikipedia.org/wiki/Mile
@@ -60,29 +61,25 @@ def print_precise_splits(time: str, distance: str):
     """
     time_split = time.split(":")
     total_seconds = int(time_split[-1])
-    time_str = "_"
     if len(time_split) == 3:
         total_seconds += int(time_split[0]) * 3600 + int(time_split[1]) * 60
-        time_str = (
-            f"{int(time_split[0])}hr {int(time_split[1])}min {int(time_split[2])}sec"
-        )
     elif len(time_split) == 2:
         total_seconds += int(time_split[0]) * 60
-        time_str = f"{time_split[0]}min {time_split[1]}sec"
 
     distance_miles = _distance_to_miles(distance)
     pace_seconds = total_seconds / distance_miles
     pace_minutes = pace_seconds // 60
     pace_seconds = pace_seconds % 60
+
     # print(
     #     f"debug:\n{distance_miles=}\n{total_seconds=}\n"
     #     f"{pace_minutes=}\n{pace_seconds=}\n"
     # )  # debug
 
     print(
-        "You must run an average split of "
-        f"{int(pace_minutes)} min {pace_seconds:.2f} sec per mile "
-        f"to run a {_distance_to_string(distance)} race in {time_str}."
+        "You must run average splits of "
+        f"{int(pace_minutes)} minutes {pace_seconds:.2f} seconds per mile "
+        f"to run a {_distance_to_string(distance)} race in {time}."
     )
 
 
