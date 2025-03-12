@@ -6,7 +6,7 @@ Usage:
     python exact-race-splits.py -t <time> -d <distance> 
 
 Significant changes done to this script should be reflected on:
-TODO
+https://gist.github.com/izzygomez/22532b2e0b6a7ce1c481d2dda65c82e6
 """
 
 import argparse
