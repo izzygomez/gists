@@ -39,14 +39,15 @@ if [[ $# -ne 2 ]]; then
 fi
 
 GIST_LINK="https://gist.github.com/izzygomez/c4efca57c2237277e3f725b612608b6b"
+MADE_BY_TOOL_MSG="This commit was made by a tool. See: $GIST_LINK"
 
 git mv "$1" "$2"
-git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to new-file" -m "See: $GIST_LINK"
+git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to new-file" -m "$MADE_BY_TOOL_MSG"
 REV=$(git rev-parse HEAD)
 git reset --hard HEAD^
 git mv "$1" temp
-git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to temp" -m "See: $GIST_LINK"
+git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to temp" -m "$MADE_BY_TOOL_MSG"
 git merge $REV
-git commit -a -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - resolve conflict and keep both files" -m "See: $GIST_LINK"
+git commit -a -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - resolve conflict and keep both files" -m "$MADE_BY_TOOL_MSG"
 git mv temp "$1"
-git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - restore name of original-file" -m "See: $GIST_LINK"
+git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - restore name of original-file" -m "$MADE_BY_TOOL_MSG"
