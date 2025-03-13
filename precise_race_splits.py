@@ -3,10 +3,10 @@ Get precise average splits (min/mi) to complete various race distances in a
 given time. Supports 5k, 10k, 15k, 10M, HM, FM distances.
 
 Usage:
-    python exact-race-splits.py -t <time> -d <distance> 
-    python exact-race-splits.py -h
+    python precise_race_splits.py -t <time> -d <distance>
+    python precise_race_splits.py -h
 
-Significant changes done to this script should be reflected on:
+Any changes to this file should be reflected at:
 https://gist.github.com/izzygomez/22532b2e0b6a7ce1c481d2dda65c82e6
 """
 
@@ -14,7 +14,7 @@ import argparse
 import re
 
 
-def valid_time_format(value):
+def _valid_time_format(value):
     pattern = re.compile(r"^(?:(\d{1,2}):)?([0-5]?\d):([0-5]?\d)$")
     if not pattern.match(value):
         raise argparse.ArgumentTypeError(
@@ -24,10 +24,10 @@ def valid_time_format(value):
 
 
 def _distance_to_miles(distance: str) -> float:
-    # 1 mile is exactly 1,609.344 metres [1].
+    # 1 mile is precisely 1,609.344 metres [1].
     # Therefore, 1 mile / 1.609344 km =  0.621371192 mile/km
-    # The half marathon distance is exactly 21.0975 km [2].
-    # Marathon is obviously exactly double that [3].
+    # The half marathon distance is precisely 21.0975 km [2].
+    # Marathon is obviously precisely double that [3].
     # [1] https://en.wikipedia.org/wiki/Mile
     # [2] https://en.wikipedia.org/wiki/Half_marathon
     # [3] https://en.wikipedia.org/wiki/Marathon
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-t",
         "--time",
-        type=valid_time_format,
+        type=_valid_time_format,
         help='Goal time ("HH:MM:SS" or "MM:SS")',
         required=True,
     )
