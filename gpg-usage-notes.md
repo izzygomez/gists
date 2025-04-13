@@ -46,3 +46,26 @@ Which produces a file `encrypted.txt`. Per `man gpg`, note that `--local-user` s
 
 # Import some public or private key
 `gpg --import some-key.asc`
+
+# Comparing Keys
+
+If you have two GPG key files (e.g. an old backup & a fresh export) & want to verify they represent the same key, **do not use `diff`** or similar tools. Exported private keys often include metadata like timestamps, export versions, or subkey ordering, so the file contents may differ even if the key material is the same.
+
+Instead, compare their **fingerprints**, which uniquely identify the cryptographic key.
+
+To safely display the fingerprint of a key file *without importing it*:
+
+```sh
+gpg --import-options show-only --with-fingerprint --import <key-file>
+```
+
+> `--import-options show-only` tells GPG to parse & display the key’s metadata without actually adding it to your keyring.
+
+Run this for both key files:
+
+```sh
+gpg --import-options show-only --with-fingerprint --import current-key.asc
+gpg --import-options show-only --with-fingerprint --import old-key.asc
+```
+
+If the fingerprints match, the keys are functionally identical and can be safely treated as the same.
