@@ -1,16 +1,18 @@
-# Listing keys
+# GPG Usage Notes
+
+## Listing keys
 
 `gpg --list-keys --with-subkey-fingerprint`
 
 `gpg --list-secret-keys`
 
-# Generating a key
+## Generating a key
 
 `gpg --full-gen-key`
 
 Remember to save the key password somewhere safe!
 
-# Deleting a key
+## Deleting a key
 
 If your keychain has both private & public keys, delete the private key first:
 
@@ -20,25 +22,29 @@ Then delete the public key:
 
 `gpg --delete-keys <key-id>`
 
-# Encrypt & (optionally) sign a message into text file
+## Encrypt and/or sign a message
 
-For encrypting & signing:
+For encrypting & signing, run the following to produce `encrypted-and-signed.txt`:
 
-`gpg --recipient <recipient-key-id> --recipient <your-key-id> --local-user <your-key-id> --sign --encrypt --armor --output encrypted.txt file-to-encrypt.txt`
+`gpg --recipient <recipient-key-id> --recipient <your-key-id> --local-user <your-key-id> --sign --encrypt --armor --output encrypted-and-signed.txt message.txt`
 
-For encrypting:
+For just encrypting, run the following to produce `encrypted.txt`:
 
-`gpg --recipient <recipient-key-id> --recipient <your-key-id> --encrypt --armor --output encrypted.txt file-to-encrypt.txt`
+`gpg --recipient <recipient-key-id> --recipient <your-key-id> --local-user <your-key-id> --encrypt --armor --output encrypted.txt message.txt`
 
-Which produces a file `encrypted.txt`. Per `man gpg`, note that `--local-user` specifies what key to use for signing. You add yourself as a recipient as well, optionally, in order to also be able to decrypt the encrypted message; got this idea from [here](https://www.youtube.com/watch?v=mE8fL5Fu8x8&t=866s). Think of the use case where you want to be able to read the encrypted emails you've sent.
+For just signing, run the following to produce `signed.txt`:
 
-# Decrypt file
+`gpg --local-user <your-key-id> --sign --armor --output signed.txt message.txt`
+
+Per `man gpg`, note that `--local-user` specifies what key to use for signing. You add yourself as a recipient as well, optionally, in order to also be able to decrypt the encrypted message; got this idea from [here](https://www.youtube.com/watch?v=mE8fL5Fu8x8&t=866s). Think of the use case where you want to be able to read the encrypted emails you've sent.
+
+## Decrypt file
 `gpg --decrypt encrypted.txt`
 
-# Export public key into text file
+## Export public key into text file
 `gpg --export --armor <key-id> > my-public-key.txt`
 
-# Export private key into text file
+## Export private key into text file
 `gpg --export-secret-key --armor <key-id> > my-private-key.txt` 
 
 > **Warning**
@@ -47,7 +53,7 @@ Which produces a file `encrypted.txt`. Per `man gpg`, note that `--local-user` s
 # Import some public or private key
 `gpg --import some-key.asc`
 
-# Comparing Keys
+## Comparing Keys
 
 If you have two GPG key files (e.g. an old backup & a fresh export) & want to verify they represent the same key, **do not use `diff`** or similar tools. Exported private keys often include metadata like timestamps, export versions, or subkey ordering, so the file contents may differ even if the key material is the same.
 
