@@ -18,7 +18,7 @@ Examples:
     python time_sum.py 1:30:00 45:30 15  # 1h30m + 45m30s + 15s = 2:15:45
 
 Any changes done to this script should be reflected on:
-TODO insert link here
+https://gist.github.com/izzygomez/e022175ea7a4fbf9c7f1d3aa1ed4ce49
 """
 
 import sys
