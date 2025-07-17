@@ -221,7 +221,14 @@ def calculate_new_working_max(
         diff_string = diff_to_string(current_percentage_diff)
     else:
         new_working_max = round_to_base(projected_max / 1.05, small_increment)
-        update_method = WorkingMaxUpdateMethod.FORCE_PERCENTAGE_DIFF
+        # There is an edge case here where the new working max when forced to be
+        # rounded to nearest multiple of small_increment is the same as the old
+        # working max. This is equivalent to STAY_SAME, so we set update_method
+        # accordingly.
+        if new_working_max == working_max:
+            update_method = WorkingMaxUpdateMethod.STAY_SAME
+        else:
+            update_method = WorkingMaxUpdateMethod.FORCE_PERCENTAGE_DIFF
         chosen_increment = None
         diff_string = diff_to_string(projected_max / new_working_max)
 
@@ -279,13 +286,13 @@ def calculate_current_maxes():
     standard_reps = 5
 
     calc_bench = True
-    calc_squat = False
+    calc_squat = True
     calc_press = True
     calc_dead = True
 
     if calc_bench:
         bench_working_max = 235
-        bench_reps_performed = 5
+        bench_reps_performed = 7
         bench_last_set_weight = 200
         calculate_new_working_max(
             Lift.BENCH,
@@ -296,9 +303,9 @@ def calculate_current_maxes():
         )
 
     if calc_squat:
-        squat_working_max = 0
-        squat_reps_performed = 0
-        squat_last_set_weight = 0
+        squat_working_max = 362.5
+        squat_reps_performed = 5
+        squat_last_set_weight = 315
         calculate_new_working_max(
             Lift.SQUAT,
             standard_reps,
@@ -308,9 +315,9 @@ def calculate_current_maxes():
         )
 
     if calc_press:
-        press_working_max = 126.25
-        press_reps_performed = 6
-        press_last_set_weight = 110
+        press_working_max = 123.75
+        press_reps_performed = 8
+        press_last_set_weight = 105
         calculate_new_working_max(
             Lift.PRESS,
             standard_reps,
@@ -320,9 +327,9 @@ def calculate_current_maxes():
         )
 
     if calc_dead:
-        dead_working_max = 377.5
-        dead_reps_performed = 6
-        dead_last_set_weight = 320
+        dead_working_max = 397.5
+        dead_reps_performed = 7
+        dead_last_set_weight = 340
         calculate_new_working_max(
             Lift.DEAD,
             standard_reps,
