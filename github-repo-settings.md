@@ -20,3 +20,4 @@ Most large Github projects use repo settings to enforce certain code & contribut
     * Enable "Do not allow bypassing the above settings"
     * Enable "Allow force pushes" only for myself
     * Click "Save Changes"
+* I find it useful to include documentation in a repo's `README` & config files on how `pre-commit` is used. See [here](https://github.com/izzygomez/dotfiles/blob/d8c05294d541964b80bbb4818339cf27098e194b/README.md#L75-L77) & [here](https://github.com/izzygomez/dotfiles/blob/d8c05294d541964b80bbb4818339cf27098e194b/.pre-commit-config.yaml#L1-L13) for some examples.
