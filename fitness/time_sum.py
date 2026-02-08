@@ -16,9 +16,6 @@ Examples:
     python time_sum.py 30 45        # 30s + 45s = 0:01:15
     python time_sum.py 5:30 2:45    # 5m30s + 2m45s = 0:08:15
     python time_sum.py 1:30:00 45:30 15  # 1h30m + 45m30s + 15s = 2:15:45
-
-Any changes done to this script should be reflected on:
-https://gist.github.com/izzygomez/e022175ea7a4fbf9c7f1d3aa1ed4ce49
 """
 
 import sys
