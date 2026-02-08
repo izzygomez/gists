@@ -40,7 +40,7 @@ if [[ $# -ne 2 ]]; then
 fi
 
 # TODO: update this to permalink ASAP
-LINK="https://github.com/izzygomez/gists/blob/main/utils/git-split.sh"
+LINK="https://github.com/izzygomez/gists/blob/8a5aabbb9187460a901257883b49f9e833487f34/utils/git-split.sh"
 MADE_BY_SCRIPT_MSG="This commit was made by a script. See: $LINK"
 
 git mv "$1" "$2"
