@@ -45,7 +45,7 @@ Per `man gpg`, note that `--local-user` specifies what key to use for signing. Y
 `gpg --export --armor <key-id> > my-public-key.txt`
 
 ## Export private key into text file
-`gpg --export-secret-key --armor <key-id> > my-private-key.txt` 
+`gpg --export-secret-key --armor <key-id> > my-private-key.txt`
 
 > **Warning**
 > Take care in saving this file safely.

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Quick script to split a file in `git` into two files while preserving blame
 # history, which is useful for e.g. code blame view on Github.com.
@@ -48,7 +48,7 @@ REV=$(git rev-parse HEAD)
 git reset --hard HEAD^
 git mv "$1" temp
 git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to temp" -m "$MADE_BY_SCRIPT_MSG"
-git merge $REV
+git merge "$REV"
 git commit -a -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - resolve conflict and keep both files" -m "$MADE_BY_SCRIPT_MSG"
 git mv temp "$1"
 git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - restore name of original-file" -m "$MADE_BY_SCRIPT_MSG"

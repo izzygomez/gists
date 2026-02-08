@@ -1,4 +1,3 @@
-#!/usr/bin/env python3.10
 """
 Script to use with The Juggernaut Method™ weightlifting program to calculate new
 working maxes.
