@@ -47,15 +47,15 @@ def print_pfitz_hr_ranges(max_hr: int, resting_hr: int, table_type: str):
         max_high = workout["maximal_hr"][1]
         maximal_hr_s = (
             f"{max_low} - {max_high}%  =>  "
-            f"{max_hr*max_low/100:.1f} - {max_hr*max_high/100:.1f} ♥ BPM"
+            f"{max_hr * max_low / 100:.1f} - {max_hr * max_high / 100:.1f} ♥ BPM"
         )
 
         res_low = workout["hr_reserve"][0]
         res_high = workout["hr_reserve"][1]
         hr_reserve_s = (
             f"{res_low} - {res_high}%  =>  "
-            f"{hr_reserve*res_low/100 + resting_hr:.1f} - "
-            f"{hr_reserve*res_high/100 + resting_hr:.1f} ♥ BPM"
+            f"{hr_reserve * res_low / 100 + resting_hr:.1f} - "
+            f"{hr_reserve * res_high / 100 + resting_hr:.1f} ♥ BPM"
         )
 
         table_data[col1].append(workout["name"])
