@@ -39,7 +39,6 @@ if [[ $# -ne 2 ]]; then
     exit 0
 fi
 
-# TODO: update this to permalink ASAP
 LINK="https://github.com/izzygomez/gists/blob/main/utils/git-split.sh"
 MADE_BY_SCRIPT_MSG="This commit was made by a script. See: $LINK"
 
