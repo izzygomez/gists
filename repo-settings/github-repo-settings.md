@@ -10,7 +10,7 @@ Most large Github projects use repo settings to enforce certain code & contribut
     * Enable **Allow auto-merge**
     * Enable **Automatically delete head branches**
   * `Rules > Rulesets > New ruleset`
-    * The remaining bullet points describe the desired ruleset options. For convenience, you can instead use **Import a ruleset** and upload [this file](https://gist.github.com/izzygomez/d6ad67417b61d7238013f138436f1028). `"source"` will be filled in automatically when the file is uploaded.
+    * The remaining bullet points describe the desired ruleset options. For convenience, you can instead use **Import a ruleset** and upload [the `main.json` file](repo-settings/main.json) in this directory. `"source"` will be filled in automatically when the file is uploaded.
     * Create a ruleset named **main**
     * Set **Enforcement Status** to **Active**
     * Under **Target branches**, select **Include default branch** (i.e., `main`)
@@ -25,5 +25,5 @@ Most large Github projects use repo settings to enforce certain code & contribut
         * Enable **Require branches to be up to date before merging**
         * Add **pre-commit.ci - pr** as a required check. This check only appears after it has run at least once, so a dummy PR may be needed.
       * Enable **Block force pushes**
-    * Click **Save changes**
+    * Click **Create/Save changes**
 * I find it useful to include documentation in a repo's `README` & config files on how `pre-commit` is used. See [here](https://github.com/izzygomez/dotfiles/blob/d8c05294d541964b80bbb4818339cf27098e194b/README.md?plain=1#L75-L77) & [here](https://github.com/izzygomez/dotfiles/blob/d8c05294d541964b80bbb4818339cf27098e194b/.pre-commit-config.yaml#L1-L13) for some examples.
