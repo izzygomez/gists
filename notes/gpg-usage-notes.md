@@ -39,18 +39,22 @@ For just signing, run the following to produce `signed.txt`:
 Per `man gpg`, note that `--local-user` specifies what key to use for signing. You add yourself as a recipient as well, optionally, in order to also be able to decrypt the encrypted message; got this idea from [here](https://www.youtube.com/watch?v=mE8fL5Fu8x8&t=866s). Think of the use case where you want to be able to read the encrypted emails you've sent.
 
 ## Decrypt file
+
 `gpg --decrypt encrypted.txt`
 
 ## Export public key into text file
+
 `gpg --export --armor <key-id> > my-public-key.txt`
 
 ## Export private key into text file
+
 `gpg --export-secret-key --armor <key-id> > my-private-key.txt`
 
 > **Warning**
 > Take care in saving this file safely.
 
 # Import some public or private key
+
 `gpg --import some-key.asc`
 
 ## Comparing Keys
@@ -59,7 +63,7 @@ If you have two GPG key files (e.g. an old backup & a fresh export) & want to ve
 
 Instead, compare their **fingerprints**, which uniquely identify the cryptographic key.
 
-To safely display the fingerprint of a key file *without importing it*:
+To safely display the fingerprint of a key file _without importing it_:
 
 ```sh
 gpg --import-options show-only --with-fingerprint --import <key-file>

@@ -29,3 +29,4 @@ Requires `git-filter-repo` (`brew install git-filter-repo`). Only single-file gi
 
 - consolidate other one-off scripts into this repo
 - write a blog post on website about how this repo was created
+- consolidate all `.pre-commit-config.yaml` files across my repos into `repo-settings/`

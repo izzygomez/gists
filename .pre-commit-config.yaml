@@ -54,3 +54,9 @@ repos:
     rev: v0.11.0.1
     hooks:
       - id: shellcheck # Lint shell scripts for common issues
+
+  # Prettier for formatting
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: "v3.8.1"
+    hooks:
+      - id: prettier
