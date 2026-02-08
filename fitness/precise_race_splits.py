@@ -5,9 +5,6 @@ given time. Supports 5k, 10k, 15k, 10M, HM, FM distances.
 Usage:
     python precise_race_splits.py -t <time> -d <distance>
     python precise_race_splits.py -h
-
-Any changes to this file should be reflected at:
-https://gist.github.com/izzygomez/22532b2e0b6a7ce1c481d2dda65c82e6
 """
 
 import argparse
