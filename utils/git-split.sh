@@ -1,10 +1,11 @@
 #!/bin/sh
 
-# Any changes to this file should be reflected at:
-# https://gist.github.com/izzygomez/c4efca57c2237277e3f725b612608b6b
-#
 # Quick script to split a file in `git` into two files while preserving blame
 # history, which is useful for e.g. code blame view on Github.com.
+#
+# Note that this script is only useful if committing directly to `main`, or
+# otherwise maintaining full commit history. If, for example, these commits are
+# made on a feature branch that is squash-merged, then this script is a no-op.
 #
 # Inspired by answers [1] & [2] from Stack Overflow.
 #
@@ -38,16 +39,17 @@ if [[ $# -ne 2 ]]; then
     exit 0
 fi
 
-GIST_LINK="https://gist.github.com/izzygomez/c4efca57c2237277e3f725b612608b6b"
-MADE_BY_TOOL_MSG="This commit was made by a tool. See: $GIST_LINK"
+# TODO: update this to permalink ASAP
+LINK="https://github.com/izzygomez/gists/blob/main/utils/git-split.sh"
+MADE_BY_SCRIPT_MSG="This commit was made by a script. See: $LINK"
 
 git mv "$1" "$2"
-git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to new-file" -m "$MADE_BY_TOOL_MSG"
+git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to new-file" -m "$MADE_BY_SCRIPT_MSG"
 REV=$(git rev-parse HEAD)
 git reset --hard HEAD^
 git mv "$1" temp
-git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to temp" -m "$MADE_BY_TOOL_MSG"
+git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - rename original-file to temp" -m "$MADE_BY_SCRIPT_MSG"
 git merge $REV
-git commit -a -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - resolve conflict and keep both files" -m "$MADE_BY_TOOL_MSG"
+git commit -a -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - resolve conflict and keep both files" -m "$MADE_BY_SCRIPT_MSG"
 git mv temp "$1"
-git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - restore name of original-file" -m "$MADE_BY_TOOL_MSG"
+git commit -n -m "[Tool Commit] Split history \`$1\` to \`$2\` - restore name of original-file" -m "$MADE_BY_SCRIPT_MSG"
