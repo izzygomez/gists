@@ -1,4 +1,4 @@
-# Sensible Github repo settings
+# Guide to setting sensible Github repo settings
 
 Most large Github projects use repo settings to enforce certain code & contribution standards. The following are some sensible settings that I've found worth using for my personal projects to have good default branch rules, & to make use of [`pre-commit`](https://pre-commit.com/) & [pre-commit.ci](https://pre-commit.ci/) effectively. The overarching philosophy is to automate formatting & deployment checks as much as possible, & to avoid committing directly to `main`.
 
@@ -10,7 +10,7 @@ Most large Github projects use repo settings to enforce certain code & contribut
     - Enable **Allow auto-merge**
     - Enable **Automatically delete head branches**
   - `Rules > Rulesets > New ruleset`
-    - The remaining bullet points describe the desired ruleset options. For convenience, you can instead use **Import a ruleset** and upload [the `main.json` file](repo-settings/main.json) in this directory. `"source"` will be filled in automatically when the file is uploaded.
+    - The remaining bullet points describe the desired ruleset options. For convenience, you can instead use **Import a ruleset** and upload [the `main.json` file](main.json) in this directory. `"source"` will be filled in automatically when the file is uploaded.
     - Create a ruleset named **main**
     - Set **Enforcement Status** to **Active**
     - Under **Target branches**, select **Include default branch** (i.e., `main`)
