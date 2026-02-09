@@ -28,5 +28,5 @@ Requires `git-filter-repo` (`brew install git-filter-repo`). Only single-file gi
 ## TODOs
 
 - write a blog post on website about how this repo was created
-- consolidate all `.pre-commit-config.yaml` files across my repos into `repo-settings/`
+- consolidate all `.pre-commit-config.yaml` files across my repos into `repo-init/`
 - consolidate all colors in scripts to a single file that is imported
