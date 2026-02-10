@@ -36,7 +36,7 @@ repos:
 
   # Ruff for linting and formatting (replaces Black, isort, and flake8)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.14
+    rev: v0.15.0
     hooks:
       - id: ruff # Linter (replaces flake8)
         args: [--fix] # Auto-fix issues when possible
