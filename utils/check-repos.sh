@@ -250,38 +250,67 @@ echo -e "${BOLD}═════════════════════�
 echo -e "${BOLD}SUMMARY${NC}"
 echo -e "${BOLD}═══════════════════════════════════════════════════════════════════════════════${NC}"
 
+# Print a blank line between summary sections, but not before the first one
+_section_count=0
+section_gap() {
+    [ "$_section_count" -gt 0 ] && echo || true
+    _section_count=$((_section_count + 1))
+}
+
+# Helper: print each array element on its own line
+print_each() { for item; do echo -e "$item"; done; }
+
 if [ ${#SUMMARY_PULLED[@]} -gt 0 ]; then
-    echo -e "${GREEN}✓ Pulled successfully (${#SUMMARY_PULLED[@]}):${NC} ${SUMMARY_PULLED[*]}"
+    section_gap
+    echo -e "${GREEN}✓ Pulled successfully (${#SUMMARY_PULLED[@]}):${NC}"
+    echo -e "${DIM}${SUMMARY_PULLED[*]}${NC}"
 fi
 
 if [ ${#SUMMARY_UP_TO_DATE[@]} -gt 0 ]; then
-    echo -e "${GREEN}✓ Already up to date (${#SUMMARY_UP_TO_DATE[@]}):${NC} ${SUMMARY_UP_TO_DATE[*]}"
+    section_gap
+    echo -e "${GREEN}✓ Already up to date (${#SUMMARY_UP_TO_DATE[@]}):${NC}"
+    echo -e "${DIM}${SUMMARY_UP_TO_DATE[*]}${NC}"
 fi
 
 if [ ${#SUMMARY_FEATURE_BRANCH[@]} -gt 0 ]; then
-    echo -e "${BLUE}◆ On feature branch (${#SUMMARY_FEATURE_BRANCH[@]}):${NC} ${SUMMARY_FEATURE_BRANCH[*]}"
+    section_gap
+    echo -e "${BLUE}◆ On feature branch (${#SUMMARY_FEATURE_BRANCH[@]}):${NC}"
+    for fb in "${SUMMARY_FEATURE_BRANCH[@]}"; do
+        local_name="${fb%% (*}"
+        branch_info="${fb#"$local_name" }"
+        echo -e "$local_name ${DIM}$branch_info${NC}"
+    done
 fi
 
 if [ ${#SUMMARY_AHEAD[@]} -gt 0 ]; then
-    echo -e "${YELLOW}▲ Ahead of remote (${#SUMMARY_AHEAD[@]}):${NC} ${SUMMARY_AHEAD[*]}"
+    section_gap
+    echo -e "${YELLOW}▲ Ahead of remote (${#SUMMARY_AHEAD[@]}):${NC}"
+    print_each "${SUMMARY_AHEAD[@]}"
 fi
 
 if [ ${#SUMMARY_BEHIND[@]} -gt 0 ]; then
-    echo -e "${RED}▼ Behind remote (${#SUMMARY_BEHIND[@]}):${NC} ${SUMMARY_BEHIND[*]}"
+    section_gap
+    echo -e "${RED}▼ Behind remote (${#SUMMARY_BEHIND[@]}):${NC}"
+    print_each "${SUMMARY_BEHIND[@]}"
 fi
 
 if [ ${#SUMMARY_DIRTY[@]} -gt 0 ]; then
-    echo -e "${YELLOW}⚠ Dirty/skipped (${#SUMMARY_DIRTY[@]}):${NC} ${SUMMARY_DIRTY[*]}"
+    section_gap
+    echo -e "${YELLOW}⚠ Dirty/skipped (${#SUMMARY_DIRTY[@]}):${NC}"
+    print_each "${SUMMARY_DIRTY[@]}"
 fi
 
 if [ ${#SUMMARY_INVALID[@]} -gt 0 ]; then
-    echo -e "${RED}✗ Invalid repos (${#SUMMARY_INVALID[@]}):${NC} ${SUMMARY_INVALID[*]}"
+    section_gap
+    echo -e "${RED}✗ Invalid repos (${#SUMMARY_INVALID[@]}):${NC}"
+    print_each "${SUMMARY_INVALID[@]}"
 fi
 
 if [ ${#SUMMARY_HAS_CHANGES[@]} -gt 0 ]; then
-    echo -e "${YELLOW}● Dirty working tree (${#SUMMARY_HAS_CHANGES[@]}):${NC} ${SUMMARY_HAS_CHANGES[*]}"
+    section_gap
+    echo -e "${YELLOW}● Dirty working tree (${#SUMMARY_HAS_CHANGES[@]}):${NC}"
+    print_each "${SUMMARY_HAS_CHANGES[@]}"
 fi
 
 echo
-total=$((${#SUMMARY_PULLED[@]} + ${#SUMMARY_UP_TO_DATE[@]} + ${#SUMMARY_FEATURE_BRANCH[@]} + ${#SUMMARY_AHEAD[@]} + ${#SUMMARY_BEHIND[@]} + ${#SUMMARY_DIRTY[@]} + ${#SUMMARY_INVALID[@]}))
-echo -e "${DIM}Total: $total repos scanned${NC}"
+echo -e "${DIM}Total: $TOTAL_REPOS repos scanned${NC}"
