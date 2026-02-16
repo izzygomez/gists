@@ -1,5 +1,7 @@
 # Gists
 
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+
 Miscellaneous scripts, notes, & one-off utilities.
 
 ## Why & how this repo was created
