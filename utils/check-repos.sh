@@ -19,6 +19,8 @@
 #   - Only pulls if on main or master branch
 #   - Repos on feature branches are reported but not pulled
 #   - Fetches from all repos in parallel for speed
+#   - Flags repos with extra local branches (other than main/master)
+#   - Flags repos with stashed changes
 #
 # Safety:
 #   Auto-pull only runs if the repo:
@@ -111,7 +113,7 @@ process_repo() {
             $has_unstaged && dirty_msg+="unstaged changes, "
             $has_untracked && dirty_msg+="untracked files, "
             dirty_msg="${dirty_msg%, }"
-            echo -e "  ${YELLOW}Dirty:${NC} $dirty_msg"
+            echo -e "  ${YELLOW}● Dirty:${NC} $dirty_msg"
             echo "$repo_name" >"$tmp_dir/$(printf "%04d" "$idx")_${repo_name}.dirty"
         fi
     }
@@ -142,48 +144,80 @@ process_repo() {
         git -C "$repo_dir" fetch --all --quiet 2>/dev/null || true
         status="$(git -C "$repo_dir" status -sb 2>/dev/null)"
 
-        # Check if on feature branch
-        if ! is_main_branch "$current_branch"; then
-            echo -e "  ${BLUE}Branch:${NC} $current_branch ${YELLOW}(feature branch)${NC}"
-            echo "  $status"
+        # Display branch - green for main/master, yellow for feature
+        if is_main_branch "$current_branch"; then
+            echo -e "  ${GREEN}Branch:${NC} $current_branch"
+        else
+            echo -e "  ${GREEN}◆ Branch:${NC} $current_branch ${GREEN}(feature branch)${NC}"
             echo "FEATURE:$repo_name ($current_branch)" >"$state_file"
-            check_dirty
-            exit 0
         fi
 
-        echo -e "  ${BLUE}Branch:${NC} $current_branch"
+        # Status section (only for main/master branches)
+        if is_main_branch "$current_branch"; then
+            if echo "$status" | grep -q '\[.*behind'; then
+                echo -e "  ${RED}▼ Status: Behind remote${NC}"
+                printf '%s\n' "  ${status//$'\n'/$'\n'  }"
 
-        if echo "$status" | grep -q '\[.*behind'; then
-            echo -e "  ${RED}Status: Behind remote${NC}"
-            echo "  $status"
-
-            if [[ $auto_pull == "true" ]]; then
-                if is_safe_to_pull "$repo_dir"; then
-                    echo -e "  ${GREEN}Pulling latest changes...${NC}"
-                    if git -C "$repo_dir" pull --ff-only origin "$current_branch" 2>&1; then
-                        echo -e "  ${GREEN}Pulled successfully.${NC}"
-                        echo "PULLED:$repo_name" >"$state_file"
+                if [[ $auto_pull == "true" ]]; then
+                    if is_safe_to_pull "$repo_dir"; then
+                        echo -e "  ${GREEN}✓ Pulling latest changes...${NC}"
+                        local pull_output
+                        if pull_output=$(git -C "$repo_dir" pull --ff-only origin "$current_branch" 2>&1); then
+                            printf '%s\n' "  ${pull_output//$'\n'/$'\n'  }"
+                            echo -e "  ${GREEN}✓ Pulled successfully.${NC}"
+                            echo "PULLED:$repo_name" >"$state_file"
+                        else
+                            printf '%s\n' "  ${pull_output//$'\n'/$'\n'  }"
+                            echo -e "  ${RED}✗ Pull failed.${NC}"
+                            echo "DIRTY:$repo_name" >"$state_file"
+                        fi
                     else
-                        echo -e "  ${RED}Pull failed.${NC}"
+                        echo -e "  ${YELLOW}⚠ Skipping pull:${NC} repo is not clean, has unpushed commits, or no upstream configured."
                         echo "DIRTY:$repo_name" >"$state_file"
                     fi
                 else
-                    echo -e "  ${YELLOW}Skipping pull:${NC} repo is not clean, has unpushed commits, or no upstream configured."
-                    echo "DIRTY:$repo_name" >"$state_file"
+                    echo "BEHIND:$repo_name" >"$state_file"
                 fi
+            elif echo "$status" | grep -q '\[.*ahead'; then
+                echo -e "  ${YELLOW}▲ Status: Ahead of remote${NC} (unpushed commits)"
+                printf '%s\n' "  ${status//$'\n'/$'\n'  }"
+                echo "AHEAD:$repo_name" >"$state_file"
             else
-                echo "BEHIND:$repo_name" >"$state_file"
+                echo -e "  ${GREEN}✓ Status: Up to date${NC}"
+                echo "UP_TO_DATE:$repo_name" >"$state_file"
             fi
-        elif echo "$status" | grep -q '\[.*ahead'; then
-            echo -e "  ${YELLOW}Status: Ahead of remote${NC} (unpushed commits)"
-            echo "  $status"
-            echo "AHEAD:$repo_name" >"$state_file"
-        else
-            echo -e "  ${GREEN}Status: Up to date${NC}"
-            echo "UP_TO_DATE:$repo_name" >"$state_file"
         fi
 
         check_dirty
+
+        # Check for extra local branches (other than main/master)
+        local extra_branch_names
+        extra_branch_names=$(git -C "$repo_dir" branch --list 2>/dev/null | sed 's/^[* ] //' | grep -v -E '^(main|master)$' || true)
+        local extra_branch_count=0
+        local has_extra_branches=false
+        if [ -n "$extra_branch_names" ]; then
+            extra_branch_count=$(echo "$extra_branch_names" | wc -l | tr -d ' ')
+            has_extra_branches=true
+        fi
+
+        # Check for stashed changes
+        local stash_count
+        stash_count=$(git -C "$repo_dir" stash list 2>/dev/null | wc -l | tr -d ' ')
+        local has_stash=false
+        [ "$stash_count" -gt 0 ] && has_stash=true
+
+        # Write marker files for summary aggregation
+        $has_extra_branches && echo "$repo_name ($extra_branch_count)" >"$tmp_dir/$(printf "%04d" "$idx")_${repo_name}.branches"
+        $has_stash && echo "$repo_name ($stash_count)" >"$tmp_dir/$(printf "%04d" "$idx")_${repo_name}.stash"
+
+        if $has_extra_branches; then
+            local branch_list
+            branch_list=$(echo "$extra_branch_names" | paste -sd ', ' -)
+            echo -e "  ${YELLOW}〣 Extra branches:${NC} ${DIM}$branch_list${NC}"
+        fi
+        if $has_stash; then
+            echo -e "  ${YELLOW}* Stashed changes:${NC} ${DIM}$stash_count${NC}"
+        fi
     } >"$out_file" 2>&1
 }
 
@@ -221,6 +255,8 @@ declare -a SUMMARY_BEHIND=()
 declare -a SUMMARY_DIRTY=()
 declare -a SUMMARY_INVALID=()
 declare -a SUMMARY_HAS_CHANGES=()
+declare -a SUMMARY_EXTRA_BRANCHES=()
+declare -a SUMMARY_STASHED=()
 
 for state_file in "$TMP_DIR"/*.state; do
     [ -f "$state_file" ] || continue
@@ -242,6 +278,16 @@ done
 for dirty_file in "$TMP_DIR"/*.dirty; do
     [ -f "$dirty_file" ] || continue
     SUMMARY_HAS_CHANGES+=("$(cat "$dirty_file")")
+done
+
+for branches_file in "$TMP_DIR"/*.branches; do
+    [ -f "$branches_file" ] || continue
+    SUMMARY_EXTRA_BRANCHES+=("$(cat "$branches_file")")
+done
+
+for stash_file in "$TMP_DIR"/*.stash; do
+    [ -f "$stash_file" ] || continue
+    SUMMARY_STASHED+=("$(cat "$stash_file")")
 done
 
 # Print summary
@@ -274,7 +320,7 @@ fi
 
 if [ ${#SUMMARY_FEATURE_BRANCH[@]} -gt 0 ]; then
     section_gap
-    echo -e "${BLUE}◆ On feature branch (${#SUMMARY_FEATURE_BRANCH[@]}):${NC}"
+    echo -e "${GREEN}◆ On feature branch (${#SUMMARY_FEATURE_BRANCH[@]}):${NC}"
     for fb in "${SUMMARY_FEATURE_BRANCH[@]}"; do
         local_name="${fb%% (*}"
         branch_info="${fb#"$local_name" }"
@@ -310,6 +356,18 @@ if [ ${#SUMMARY_HAS_CHANGES[@]} -gt 0 ]; then
     section_gap
     echo -e "${YELLOW}● Dirty working tree (${#SUMMARY_HAS_CHANGES[@]}):${NC}"
     print_each "${SUMMARY_HAS_CHANGES[@]}"
+fi
+
+if [ ${#SUMMARY_EXTRA_BRANCHES[@]} -gt 0 ]; then
+    section_gap
+    echo -e "${YELLOW}〣 Extra branches (${#SUMMARY_EXTRA_BRANCHES[@]}):${NC}"
+    print_each "${SUMMARY_EXTRA_BRANCHES[@]}"
+fi
+
+if [ ${#SUMMARY_STASHED[@]} -gt 0 ]; then
+    section_gap
+    echo -e "${YELLOW}* Stashed changes (${#SUMMARY_STASHED[@]}):${NC}"
+    print_each "${SUMMARY_STASHED[@]}"
 fi
 
 echo
