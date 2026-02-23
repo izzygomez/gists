@@ -15,7 +15,7 @@
 #   ./check-repos.sh ~/code              # Check all repos under ~/code
 #
 # Behavior:
-#   - Prompts whether to auto-pull repos that are behind (default: no)
+#   - Prompts whether to auto-pull repos that are behind (default: yes)
 #   - Only pulls if on main or master branch
 #   - Repos on feature branches are reported but not pulled
 #   - Fetches from all repos in parallel for speed
@@ -49,13 +49,13 @@ TOP_DIR="$(realpath "${1:-.}")"
 # Prompt for auto-pull
 echo -e "${BOLD}Checking repos in:${NC} $TOP_DIR"
 echo
-read -r -p "Auto-pull repos that are behind? [yN] " response
-if [[ $response =~ ^[Yy]$ ]]; then
-    AUTO_PULL=true
-    echo -e "${GREEN}Auto-pull enabled${NC} (main/master branches only)"
-else
+read -r -p "Auto-pull repos that are behind? [Y/n] " response
+if [[ $response =~ ^[Nn]$ ]]; then
     AUTO_PULL=false
     echo -e "${YELLOW}Auto-pull disabled${NC} (status check only)"
+else
+    AUTO_PULL=true
+    echo -e "${GREEN}Auto-pull enabled${NC} (main/master branches only)"
 fi
 
 # Create temp directory for parallel output
