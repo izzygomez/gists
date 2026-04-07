@@ -12,6 +12,11 @@
 #   where {files} is the regex of files to process, & {exclude} is the regex of
 #   files to exclude.
 
+# https://pre-commit.ci/ configuration
+ci:
+  autofix_prs: true
+  autoupdate_schedule: monthly
+
 repos:
   # Pre-commit's built-in collection
   - repo: https://github.com/pre-commit/pre-commit-hooks
