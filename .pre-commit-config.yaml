@@ -41,7 +41,7 @@ repos:
 
   # Ruff for linting and formatting (replaces Black, isort, and flake8)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.9
+    rev: v0.15.12
     hooks:
       - id: ruff # Linter (replaces flake8)
         args: [--fix] # Auto-fix issues when possible
@@ -49,7 +49,7 @@ repos:
 
   # Shell script formatting
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.13.0-1
+    rev: v3.13.1-1
     hooks:
       - id: shfmt # Format shell scripts
         args: [-w, -s, -i, "4"] # Write changes, simplify code, 4-space indent
@@ -62,6 +62,6 @@ repos:
 
   # Prettier for formatting
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: "v3.8.1"
+    rev: "v3.8.3"
     hooks:
       - id: prettier
