@@ -34,6 +34,7 @@ fi
 echo "    -d  display won't sleep"
 echo "    -i  system won't idle sleep"
 echo "    -s  system won't sleep on AC power"
+echo "    -u  user activity keeps screensaver/lock from triggering"
 echo ""
 echo "  Press Ctrl+C to stop"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -56,9 +57,9 @@ trap cleanup SIGINT SIGTERM
 
 # Start caffeinate in background
 if [ -n "$DURATION" ]; then
-    caffeinate -d -i -s -t "$DURATION" &
+    caffeinate -d -i -s -u "$DURATION" &
 else
-    caffeinate -d -i -s &
+    caffeinate -d -i -s -u &
 fi
 CAFFEINATE_PID=$!
 
