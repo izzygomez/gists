@@ -1,0 +1,2 @@
+# ignore actual maxes script; see `fitness/my_maxes.template.py`
+fitness/my_maxes.py
