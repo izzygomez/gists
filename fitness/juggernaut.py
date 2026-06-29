@@ -1,17 +1,13 @@
 """
 Script to use with The Juggernaut Method™ weightlifting program to calculate new
 working maxes.
+
+Requires Python 3.10+.
 """
 
 from enum import Enum
 import re
-import sys
 import textwrap
-
-
-if sys.version_info < (3, 10):
-    print("Error: This script requires at least Python 3.10 to run.")
-    sys.exit(1)
 
 
 class Lift(Enum):
@@ -28,17 +24,12 @@ class WorkingMaxUpdateMethod(Enum):
     FORCE_PERCENTAGE_DIFF = 4
 
 
-# From https://stackoverflow.com/a/17303428
-class format:
+class style:
     PURPLE = "\033[95m"
     CYAN = "\033[96m"
-    DARKCYAN = "\033[36m"
-    BLUE = "\033[94m"
     GREEN = "\033[92m"
-    YELLOW = "\033[93m"
     RED = "\033[91m"
     BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
     END = "\033[0m"
 
 
@@ -69,29 +60,25 @@ def calc_1rm_brzycki(weight, reps):
 
 
 def diff_to_string(diff):
-    # See https://stackoverflow.com/a/8885688 for formatting syntax
-    return "{:.2f}".format((diff - 1.0) * 100) + "%"
+    return f"{(diff - 1.0) * 100:.2f}%"
 
 
-def update_method_to_increment_string(update_method):
-    match update_method:
-        case WorkingMaxUpdateMethod.BIG_INCREMENT:
-            return "big-increment"
-        case WorkingMaxUpdateMethod.SMALL_INCREMENT:
-            return "small-increment"
-        case _:
-            return "ERROR"
+def format_signed(val):
+    if val >= 0:
+        return f"{style.GREEN}+{val}{style.END}"
+    else:
+        return f"{style.RED}{val}{style.END}"
 
 
-def round_to_base(x, base=2.5, prec=2):
-    """Round to nearest multiple of base.
+def round_down_to_base(x, base=2.5, prec=2):
+    """Round down to the nearest multiple of base.
 
     Args:
         x: Number to round.
-        base: Base to round to.
-        prec: Precision to round to. Defaults to 2.
+        base: Base to round down to. Defaults to 2.5.
+        prec: Decimal precision of result. Defaults to 2.
     """
-    return round(base * round(float(x) / base), prec)
+    return round(base * round(float(x) // base), prec)
 
 
 def wrap_text_with_new_lines(paragraphs, max_line_len):
@@ -110,12 +97,9 @@ def wrap_text_with_new_lines(paragraphs, max_line_len):
     replace the ANSI codes with a placeholder character "^" before wrapping the
     text. This is why the paragraphs should not contain the "^" character.
     """
-    blank_char = " "
     wrapped_paragraphs = []
 
-    for i in range(len(paragraphs)):
-        paragraph = paragraphs[i]
-
+    for i, paragraph in enumerate(paragraphs):
         # Extract ANSI codes and replace them with placeholder "^"
         ansi_codes = []
         clean_paragraph = ""
@@ -137,8 +121,8 @@ def wrap_text_with_new_lines(paragraphs, max_line_len):
             wrapped_text = textwrap.fill(
                 clean_paragraph,
                 width=max_line_len,
-                initial_indent=blank_char * 2,  # indent bullet points
-                subsequent_indent=blank_char * 4,  # further indent when wrapped
+                initial_indent=" " * 2,  # indent bullet points
+                subsequent_indent=" " * 4,  # further indent when wrapped
             )
 
         # Reinsert the ANSI codes sequentially
@@ -165,28 +149,27 @@ def calculate_new_working_max(
         lift: Enum indicating lift.
         standard_reps: Standard reps in current wave that was just completed.
         working_max: Working max in current wave that was just completed.
-        reps_performed: Reps performed in last AMAP set in the Realization phase.
-        last_set_weight: Weight used in last AMAP set in the Realization phase.
+        reps_performed: Reps in last AMAP set in the realization phase.
+        last_set_weight: Weight in last AMAP set in the realization phase.
     """
     # Note: choosing to use Epley formula since it's a bit more optimistic (i.e.
     # higher vals) than Brzycki, but this can be adjusted later if needed.
     projected_max = calc_1rm_epley(last_set_weight, reps_performed)
 
     # cap extra reps to at most 10
+    # TODO: it's not clear how this should behave if
+    # reps_performed < standard_reps or reps_performed == 0. Investigate & fix.
     extra_reps = min(reps_performed - standard_reps, 10)
 
     if lift == Lift.BENCH or lift == Lift.PRESS:
         big_increment = 2.5
         small_increment = 1.25
-    elif lift == Lift.SQUAT or lift == Lift.DEAD:
+    else:  # lift == Lift.SQUAT or lift == Lift.DEAD
         big_increment = 5.0
         small_increment = 2.5
-    else:
-        print("Invalid `lift` passed into calculate_new_working_max")
-        return
 
-    big_working_max = working_max + extra_reps * big_increment
-    small_working_max = working_max + extra_reps * small_increment
+    big_wm = working_max + extra_reps * big_increment
+    small_wm = working_max + extra_reps * small_increment
 
     # As a general rule of thumb, we want the new working max to stay at least
     # 5% below the projected max. We therefore calculate the ratio between the
@@ -197,89 +180,67 @@ def calculate_new_working_max(
     # working max the same. If not, then we calculate the new working max by
     # forcing a 5% difference to the projected max (& round to nearest
     # multiple of small_increment).
-    big_percentage_diff = projected_max / big_working_max
-    small_percentage_diff = projected_max / small_working_max
+    big_percentage_diff = projected_max / big_wm
+    small_percentage_diff = projected_max / small_wm
     current_percentage_diff = projected_max / working_max
     if big_percentage_diff >= 1.05:
-        new_working_max = big_working_max
+        new_wm = big_wm
         update_method = WorkingMaxUpdateMethod.BIG_INCREMENT
-        chosen_increment = big_increment
-        diff_string = diff_to_string(big_percentage_diff)
+        diff_str = diff_to_string(big_percentage_diff)
     elif small_percentage_diff >= 1.05:
-        new_working_max = small_working_max
+        new_wm = small_wm
         update_method = WorkingMaxUpdateMethod.SMALL_INCREMENT
-        chosen_increment = small_increment
-        diff_string = diff_to_string(small_percentage_diff)
+        diff_str = diff_to_string(small_percentage_diff)
     elif current_percentage_diff >= 1.05:
-        new_working_max = working_max
+        new_wm = working_max
         update_method = WorkingMaxUpdateMethod.STAY_SAME
-        chosen_increment = None
-        diff_string = diff_to_string(current_percentage_diff)
+        diff_str = diff_to_string(current_percentage_diff)
     else:
-        new_working_max = round_to_base(projected_max / 1.05, small_increment)
+        new_wm = round_down_to_base(projected_max / 1.05, small_increment)
         # There is an edge case here where the new working max when forced to be
         # rounded to nearest multiple of small_increment is the same as the old
         # working max. This is equivalent to STAY_SAME, so we set update_method
         # accordingly.
-        if new_working_max == working_max:
+        if new_wm == working_max:
             update_method = WorkingMaxUpdateMethod.STAY_SAME
         else:
             update_method = WorkingMaxUpdateMethod.FORCE_PERCENTAGE_DIFF
-        chosen_increment = None
-        diff_string = diff_to_string(projected_max / new_working_max)
+        diff_str = diff_to_string(projected_max / new_wm)
 
     # Prints
     paragraphs = []
 
-    paragraphs.append(f"{format.BOLD}{lift_to_string(lift)}:{format.END}")
-    paragraphs.append(
-        f"• New working max is "
-        f"{format.GREEN}{format.BOLD}{new_working_max:0.2f} lbs{format.END}."
-    )
+    paragraphs.append(f"{style.BOLD}{lift_to_string(lift)}:{style.END}")
 
+    old_wm_str = f"{style.RED}{working_max:0.2f} lbs{style.END}"
+    new_wm_str = f"{style.GREEN}{style.BOLD}{new_wm:0.2f} lbs{style.END}"
     if update_method == WorkingMaxUpdateMethod.STAY_SAME:
-        paragraphs.append(
-            f"• Both increment options were insufficient when updating the "
-            f"{format.RED}{working_max:0.2f} lb{format.END} old working max "
-            f"(with {format.CYAN}{extra_reps} extra reps{format.END}) to "
-            f"stay >=5% under projected max, but the old working max stays "
-            f"within bounds, so keeping it the same."
-        )
+        paragraphs.append(f"• Working max stays the same at {old_wm_str}.")
     elif update_method == WorkingMaxUpdateMethod.FORCE_PERCENTAGE_DIFF:
         paragraphs.append(
-            f"• Both increment options were insufficient when updating the "
-            f"{format.RED}{working_max:0.2f} lb{format.END} old working max "
-            f"(with {format.CYAN}{extra_reps} extra reps{format.END}) to "
-            f"stay >=5% under projected max, & old working max does not stay "
-            f"within bounds, so setting new working max to be ~5% under "
-            f"(rounded to nearest "
-            f"{format.CYAN}{small_increment:0.2f} lbs{format.END})."
+            f"• Decreasing working max from {old_wm_str} to {new_wm_str}."
         )
     else:
         paragraphs.append(
-            f"• We used the "
-            f"{format.CYAN}{chosen_increment:0.2f} lbs{format.END} "
-            f"{update_method_to_increment_string(update_method)} to increase "
-            f"the {format.RED}{working_max:0.2f} lb{format.END} old working "
-            f"max (with {format.CYAN}{extra_reps} extra reps{format.END}), "
-            f"i.e. did {format.CYAN}{reps_performed} reps{format.END} "
-            f"on last set when attempting {format.CYAN}{standard_reps} "
-            f"reps{format.END} of {format.CYAN}{last_set_weight} "
-            f"lbs{format.END}."
+            f"• Increasing working max from {old_wm_str} to {new_wm_str}."
         )
 
     paragraphs.append(
-        f"• The percentage difference between the new "
-        f"{format.GREEN}{new_working_max:0.2f} lbs{format.END} working max & "
-        f"the {format.PURPLE}{projected_max:0.2f} lbs{format.END} projected "
-        f"max is {format.BOLD}{diff_string}{format.END}."
+        f"• Did {style.CYAN}{reps_performed} reps{style.END} on last AMAP "
+        f"set of {style.CYAN}{standard_reps}x{last_set_weight} lbs{style.END} "
+        f"({format_signed(extra_reps)})."
+    )
+    paragraphs.append(
+        f"• New {new_wm_str} working max is {style.BOLD}{diff_str}{style.END} "
+        f"below the {style.PURPLE}{projected_max:0.2f} lbs{style.END} "
+        f"projected max."
     )
 
     print(wrap_text_with_new_lines(paragraphs, max_line_len=100), "\n")
 
 
 def calculate_current_maxes():
-    standard_reps = 5
+    standard_reps = 3
 
     calc_bench = True
     calc_squat = True
@@ -287,9 +248,9 @@ def calculate_current_maxes():
     calc_dead = True
 
     if calc_bench:
-        bench_working_max = 235
-        bench_reps_performed = 7
-        bench_last_set_weight = 200
+        bench_working_max = 228.75
+        bench_reps_performed = 5
+        bench_last_set_weight = 205
         calculate_new_working_max(
             Lift.BENCH,
             standard_reps,
@@ -299,9 +260,9 @@ def calculate_current_maxes():
         )
 
     if calc_squat:
-        squat_working_max = 362.5
-        squat_reps_performed = 5
-        squat_last_set_weight = 315
+        squat_working_max = 340
+        squat_reps_performed = 7
+        squat_last_set_weight = 305
         calculate_new_working_max(
             Lift.SQUAT,
             standard_reps,
@@ -311,9 +272,9 @@ def calculate_current_maxes():
         )
 
     if calc_press:
-        press_working_max = 123.75
-        press_reps_performed = 8
-        press_last_set_weight = 105
+        press_working_max = 126.25
+        press_reps_performed = 6
+        press_last_set_weight = 115
         calculate_new_working_max(
             Lift.PRESS,
             standard_reps,
@@ -323,9 +284,9 @@ def calculate_current_maxes():
         )
 
     if calc_dead:
-        dead_working_max = 397.5
-        dead_reps_performed = 7
-        dead_last_set_weight = 340
+        dead_working_max = 382.5
+        dead_reps_performed = 6
+        dead_last_set_weight = 345
         calculate_new_working_max(
             Lift.DEAD,
             standard_reps,
