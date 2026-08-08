@@ -5,9 +5,9 @@ working maxes.
 Requires Python 3.10+.
 """
 
-from enum import Enum
 import re
 import textwrap
+from enum import Enum
 
 
 class Lift(Enum):
