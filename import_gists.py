@@ -92,6 +92,7 @@ def run(cmd, cwd=None):
         cwd=cwd,
         capture_output=True,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         raise CommandError(f"Command failed: {cmd}\n{result.stderr}")
@@ -111,7 +112,8 @@ def make_commit_callback(filename, gist_id):
         parts = commit.author_date.split()
         timestamp = int(parts[0])
         tz = parts[1].decode() if isinstance(parts[1], bytes) else parts[1]
-        date_str = datetime.datetime.fromtimestamp(timestamp).strftime(
+        tzinfo = datetime.datetime.strptime(tz, "%z").tzinfo
+        date_str = datetime.datetime.fromtimestamp(timestamp, tz=tzinfo).strftime(
             "%Y-%m-%d %H:%M:%S"
         )
 
@@ -235,6 +237,7 @@ def main():
         shell=True,
         cwd=repo_dir,
         capture_output=True,
+        check=False,
     )
     if result.returncode != 0:
         print(f"{C['yellow']}Creating empty initial commit...{C['reset']}")
