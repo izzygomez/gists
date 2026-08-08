@@ -1,3 +1,4 @@
+################################################################################
 # See pre-commit.com for documentation.
 #
 # Some helpful commands:
@@ -11,15 +12,15 @@
 #   `git ls-files | grep -E '{files}' | grep -v -E '{exclude}'`
 #   where {files} is the regex of files to process, & {exclude} is the regex of
 #   files to exclude.
-#
-# https://pre-commit.ci/ configuration
+################################################################################
 
+# https://pre-commit.ci/ configuration
 ci:
-  autofix_prs: false
+  autofix_prs: false # this doesn't work well with stacked PRs
   autoupdate_schedule: monthly
 
 repos:
-  # Pre-commit's built-in collection
+  # pre-commit-hooks — general file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -40,7 +41,7 @@ repos:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
 
-  # Ruff for Python linting & formatting
+  # Ruff — Python linting & formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.1
     hooks:
@@ -48,20 +49,20 @@ repos:
         args: [--fix] # auto-fix issues when possible
       - id: ruff-format # formatter
 
-  # Shell script formatting
+  # shfmt — shell script formatting
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.13.1-1
     hooks:
       - id: shfmt
         args: [-w, -s, -i, "4"] # write changes, simplify code, 4-space indent
 
-  # Shell script linting
+  # shellcheck — shell script linting
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
 
-  # Prettier for formatting
+  # Prettier — multi-language formatting
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: "v3.9.6"
     hooks:
