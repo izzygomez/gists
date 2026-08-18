@@ -3,15 +3,19 @@
 # stay-awake.sh
 # Prevents your Mac from sleeping, using `caffeinate`.
 
-DURATION=""
+DURATION="" # total seconds passed to caffeinate (empty = indefinite)
 DURATION_DISPLAY="indefinitely"
+INPUT_FORM="" # how -t was written: SEC | MIN:SEC | HR:MIN:SEC
 
 usage() {
     cat <<'EOF'
-Usage: stay-awake.sh [-t seconds] [-h]
+Usage: stay-awake.sh [-t DURATION] [-h]
 
-  -t seconds   Stay awake for a fixed duration, then exit. Must be a
-               positive integer. Omit to stay awake indefinitely.
+  -t DURATION  Stay awake for a fixed time, then exit. DURATION is one of:
+                 SECONDS   a positive integer, e.g. 9000
+                 MM:SS     minutes:seconds, e.g. 2:30   (SS is 00-59)
+                 HH:MM:SS  hours:minutes:seconds, e.g. 2:30:00 (MM, SS 00-59)
+               Omit -t to stay awake indefinitely.
   -h, --help   Show this help.
 
 Flags passed to caffeinate:
@@ -20,6 +24,55 @@ Flags passed to caffeinate:
     -s  system won't sleep on AC power
     -u  keeps screensaver/lock from triggering
 EOF
+}
+
+# Parse a -t value into total seconds. Accepts:
+#   SECONDS    one integer, e.g. 9000
+#   MM:SS      e.g. 2:30      (SS is 00-59; MM is not capped, so 90:00 is valid)
+#   HH:MM:SS   e.g. 2:30:00   (MM and SS are 00-59; HH is not capped)
+# Sets globals DURATION (integer seconds) and INPUT_FORM (SEC|MIN:SEC|HR:MIN:SEC).
+# `10#` forces base 10 so a leading zero (e.g. 08) is not read as octal.
+# Returns 1 for a bad format, 2 for a zero duration.
+parse_duration() {
+    local raw=$1 h m s
+    if [[ $raw =~ ^[0-9]+$ ]]; then
+        DURATION=$((10#$raw))
+        INPUT_FORM="SEC"
+    elif [[ $raw =~ ^([0-9]+):([0-5]?[0-9])$ ]]; then
+        m=$((10#${BASH_REMATCH[1]}))
+        s=$((10#${BASH_REMATCH[2]}))
+        DURATION=$((m * 60 + s))
+        INPUT_FORM="MIN:SEC"
+    elif [[ $raw =~ ^([0-9]+):([0-5]?[0-9]):([0-5]?[0-9])$ ]]; then
+        h=$((10#${BASH_REMATCH[1]}))
+        m=$((10#${BASH_REMATCH[2]}))
+        s=$((10#${BASH_REMATCH[3]}))
+        DURATION=$((h * 3600 + m * 60 + s))
+        INPUT_FORM="HR:MIN:SEC"
+    else
+        return 1
+    fi
+    [ "$DURATION" -gt 0 ] || return 2
+    return 0
+}
+
+# Render seconds as words (e.g. "2hr 30min"), at the granularity of INPUT_FORM.
+# Zero-valued fields are dropped. MM:SS keeps minutes uncapped (90:00 -> 90min);
+# a bare seconds value and HH:MM:SS both carry up into hr/min/sec.
+format_duration() {
+    local total=$1 form=$2 h=0 m=0 s=0 out=""
+    if [ "$form" = "MIN:SEC" ]; then
+        m=$((total / 60))
+        s=$((total % 60))
+    else
+        h=$((total / 3600))
+        m=$((total % 3600 / 60))
+        s=$((total % 60))
+    fi
+    [ "$h" -gt 0 ] && out="${h}hr"
+    [ "$m" -gt 0 ] && out="${out:+$out }${m}min"
+    [ "$s" -gt 0 ] && out="${out:+$out }${s}sec"
+    printf '%s' "$out"
 }
 
 # Long options: getopts only handles single-char flags, so handle these first.
@@ -42,12 +95,24 @@ done
 while getopts ":t:h" opt; do
     case $opt in
     t)
-        DURATION=$OPTARG
-        if ! [[ $DURATION =~ ^[0-9]+$ ]] || [ "$DURATION" -eq 0 ]; then
-            echo "Error: -t requires a positive integer (seconds), got '$DURATION'" >&2
+        parse_duration "$OPTARG"
+        case $? in
+        1)
+            echo "Error: -t must be SECONDS, MM:SS, or HH:MM:SS with MM and SS 00-59, got '$OPTARG'" >&2
+            usage >&2
             exit 1
+            ;;
+        2)
+            echo "Error: -t duration must be more than 0, got '$OPTARG'" >&2
+            exit 1
+            ;;
+        esac
+        DURATION_DISPLAY="for $(format_duration "$DURATION" "$INPUT_FORM")"
+        # Echo the raw seconds only for a bare seconds input, and only once it
+        # was regrouped into larger units (>= 60s); below that it is redundant.
+        if [ "$INPUT_FORM" = "SEC" ] && [ "$DURATION" -ge 60 ]; then
+            DURATION_DISPLAY="$DURATION_DISPLAY (i.e. $DURATION seconds)"
         fi
-        DURATION_DISPLAY="for ${DURATION} seconds"
         ;;
     h)
         usage
