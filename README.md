@@ -4,7 +4,8 @@
 
 Miscellaneous scripts, notes, & one-off utilities.
 
-## Why & how this repo was created
+<details>
+<summary><h2>Why & how this repo was created</h2></summary>
 
 I migrated my gists from [gist.github.com/izzygomez](https://gist.github.com/izzygomez) into this repo to get full repo features, such as a directory structure, grepability across files, & easier syncing of gist changes across machines. Since each gist.github.com gist is already a full git repo, I wrote `import_gists.py` to preserve commit history during the migration. It:
 
@@ -27,8 +28,13 @@ The `gists_to_import.txt` file is a list of `<filename> <gist_id>` pairs, where:
 
 Requires `git-filter-repo` (`brew install git-filter-repo`). Only single-file gists are supported.
 
-## TODOs
+</details>
+
+<details>
+<summary><h2>TODOs</h2></summary>
 
 - write a blog post on website about how this repo was created
 - consolidate all `.pre-commit-config.yaml` files across my repos into `repo-init/`
 - consolidate all colors in scripts to a single file that is imported
+
+</details>
