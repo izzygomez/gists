@@ -18,11 +18,14 @@ Usage: stay-awake.sh [-t DURATION] [-h]
                Omit -t to stay awake indefinitely.
   -h, --help   Show this help.
 
-Flags passed to caffeinate:
+Flags passed to caffeinate, as `-disu -w <pid of this script>`:
     -d  display won't sleep
     -i  system won't idle sleep
     -s  system won't sleep on AC power
     -u  keeps screensaver/lock from triggering
+    -w  stop if this script dies (e.g. if `kill -9 <pid>` is used)
+
+This script keeps its own timer instead of using caffeinate's `-t` flag.
 EOF
 }
 
@@ -156,12 +159,12 @@ print_footer() {
 START=$SECONDS # set BEFORE the trap that references it
 
 cleanup() {
-    trap - SIGINT SIGTERM              # avoid re-entry
+    trap - SIGINT SIGTERM SIGHUP       # avoid re-entry
     kill "$CAFFEINATE_PID" 2>/dev/null # explicitly stop caffeinate (SIGTERM-safe)
     print_footer "Stopped after" "$((SECONDS - START))"
     exit 0
 }
-trap cleanup SIGINT SIGTERM
+trap cleanup SIGINT SIGTERM SIGHUP
 
 # Banner
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -169,35 +172,49 @@ echo "  🍵 stay-awake.sh"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  Keeping your Mac awake $DURATION_DISPLAY"
 echo ""
-if [ -n "$DURATION" ]; then
-    echo "  Running: caffeinate -d -i -s -u -t $DURATION"
-else
-    echo "  Running: caffeinate -d -i -s -u"
-fi
+echo "  Running: caffeinate -disu -w $$"
 echo "    -d  display won't sleep"
 echo "    -i  system won't idle sleep"
 echo "    -s  system won't sleep on AC power"
 echo "    -u  keeps screensaver/lock from triggering"
+echo "    -w  stops caffeinate if stay-awake.sh dies"
+echo "        (e.g. \`kill -9 $$\`)"
 echo ""
 echo "  Press Ctrl+C to stop"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Start caffeinate in the background so we can show a live counter.
-if [ -n "$DURATION" ]; then
-    caffeinate -d -i -s -u -t "$DURATION" &
-else
-    caffeinate -d -i -s -u &
-fi
+# Background caffeinate so we can show a live counter.
+# Not using caffeinate's -t: it is not strictly wall-clock time, because macOS
+# defers the timer it exits on to save power, so it always runs long (up to 60s).
+caffeinate -disu -w $$ &
 CAFFEINATE_PID=$!
 
-# Live counter. Track the last displayed value so the footer matches the
-# counter exactly, instead of re-reading the clock after the final sleep.
+# Live counter. This loop, not caffeinate, decides when the time is up.
 ELAPSED=0
-while kill -0 "$CAFFEINATE_PID" 2>/dev/null; do
+REASON=""
+while :; do
     ELAPSED=$((SECONDS - START))
+    if [ -n "$DURATION" ] && [ "$ELAPSED" -gt "$DURATION" ]; then
+        ELAPSED=$DURATION # never display or report past the target
+    fi
     printf "\r  ⏱  Running for: %s" "$(format_time "$ELAPSED")"
+
+    if [ -n "$DURATION" ] && [ "$ELAPSED" -ge "$DURATION" ]; then
+        REASON="done"
+        break
+    fi
+    # caffeinate should outlive the target; if it is gone, something killed it.
+    if ! kill -0 "$CAFFEINATE_PID" 2>/dev/null; then
+        REASON="early"
+        break
+    fi
     sleep 1
 done
 
-# caffeinate exited on its own (e.g. -t expired)
-print_footer "Done — ran for" "$ELAPSED"
+kill "$CAFFEINATE_PID" 2>/dev/null # release the assertions
+
+if [ "$REASON" = "done" ]; then
+    print_footer "Done — ran for" "$ELAPSED"
+else
+    print_footer "Stopped early, caffeinate exited — ran for" "$ELAPSED"
+fi
