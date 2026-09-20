@@ -3,7 +3,7 @@
 Most large Github projects use repo settings to enforce certain code & contribution standards. The following are some sensible settings that I've found worth using for my personal projects to have good default branch rules, & to make use of [`pre-commit`](https://pre-commit.com/) & [pre-commit.ci](https://pre-commit.ci/) effectively. The overarching philosophy is to automate formatting & deployment checks as much as possible, & to avoid committing directly to `main`.
 
 - Give [pre-commit.ci](https://results.pre-commit.ci/) access to the repository
-- Add [`.github/CODEOWNERS`](CODEOWNERS) so reviews are requested on all PRs (required for the `require-my-review` ruleset below)
+- Add [`.github/CODEOWNERS`](CODEOWNERS) so reviews are requested on PRs opened by others (required for the `require-my-review` ruleset below)
 - In `Repo > Settings`
   - `General > Pull Requests`
     - Only enable **Allow squash merging**, with the default commit message set to **Pull request title and description**
@@ -23,7 +23,6 @@ Most large Github projects use repo settings to enforce certain code & contribut
         - Enable **Require a pull request before merging**
           - Most sub-options here are not necessary for personal projects, since I'm the only contributor, though they are sensible elsewhere.
           - Enable **Dismiss stale pull request approvals when new commits are pushed**
-          - Enable **Require extra approval for unattributed changes** (so Copilot-or-similar commits can't slip through without another look)
           - Under **Allowed merge methods**, select only **Squash**
         - Enable **Require status checks to pass**
           - Enable **Require branches to be up to date before merging**
@@ -34,7 +33,7 @@ Most large Github projects use repo settings to enforce certain code & contribut
       - Set **Enforcement Status** to **Active**
       - Under **Target branches**, select **Include default branch**
       - Under **Rules > Branch rules**, enable **Require a pull request before merging** with **Require review from Code Owners**
-      - Under **Bypass list**, add yourself with **Allow this actor to bypass...** set to **Pull requests** — so you can still merge your own PRs via the **Merge without waiting for requirements to be met (bypass rules)** checkbox when you don't need a formal self-approval
+      - Under **Bypass list**, add yourself with **Allow this actor to bypass...** set to **Pull requests**. Your changes must still go through a PR, but your own PRs won’t be blocked by an impossible self-review requirement. On PRs from other actors, GitHub requires your CODEOWNERS review and also gives you an explicit bypass option.
       - If importing the JSON, confirm the `bypass_actors` entry matches your user (the export is keyed to my account id)
     - Click **Create/Save changes** for each ruleset
 - I find it useful to include documentation in a repo's `README` & config files on how `pre-commit` is used. See [here](https://github.com/izzygomez/dotfiles/blob/d8c05294d541964b80bbb4818339cf27098e194b/README.md?plain=1#L75-L77) & [here](https://github.com/izzygomez/dotfiles/blob/d8c05294d541964b80bbb4818339cf27098e194b/.pre-commit-config.yaml#L1-L13) for some examples.
