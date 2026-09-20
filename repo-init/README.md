@@ -13,8 +13,9 @@ In addition to the files in this directory listed in the Contents section below,
 
 ## Contents
 
-| File                                                       | Description                                                                                                |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [`sensible-settings-guide.md`](sensible-settings-guide.md) | Step-by-step guide for configuring GitHub repo settings, branch rulesets, & pre-commit.ci integration      |
-| [`main.json`](main.json)                                   | Exportable GitHub branch ruleset that can be directly imported into a repo's `Settings > Rules > Rulesets` |
-| [`CODEOWNERS`](CODEOWNERS) → `.github/CODEOWNERS`          | Template CODEOWNERS file to auto-request reviews on all PRs (useful for getting notified of bot PRs)       |
+| File                                                                                   | Description                                                                                                                        |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [`sensible-settings-guide.md`](sensible-settings-guide.md)                             | Step-by-step guide for configuring GitHub repo settings, branch rulesets, & pre-commit.ci integration                              |
+| [`rulesets/default-branch-protections.json`](rulesets/default-branch-protections.json) | Branch ruleset: require PRs (squash only), status checks, no force-pushes/deletions on the default branch                          |
+| [`rulesets/require-my-review.json`](rulesets/require-my-review.json)                   | Branch ruleset: require CODEOWNERS review before merge (with a bypass for myself when merging my own PRs)                          |
+| [`CODEOWNERS`](CODEOWNERS) → `.github/CODEOWNERS`                                      | Template CODEOWNERS file to auto-request reviews on all PRs (needed for `require-my-review`; also useful for bot PR notifications) |
