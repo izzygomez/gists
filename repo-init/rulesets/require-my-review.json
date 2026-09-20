@@ -1,7 +1,6 @@
 {
   "name": "require-my-review",
   "target": "branch",
-  "source_type": "Repository",
   "enforcement": "active",
   "conditions": {
     "ref_name": {

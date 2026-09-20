@@ -1,7 +1,6 @@
 {
   "name": "default-branch-protections",
   "target": "branch",
-  "source_type": "Repository",
   "enforcement": "active",
   "conditions": {
     "ref_name": {
