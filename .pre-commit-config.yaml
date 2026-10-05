@@ -43,7 +43,7 @@ repos:
 
   # Ruff — Python linting & formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.6
+    rev: v0.16.10
     hooks:
       - id: ruff-check # linter
         args: [--fix] # auto-fix issues when possible
@@ -51,7 +51,7 @@ repos:
 
   # shfmt — shell script formatting
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.13.1-1
+    rev: v3.14.1-1
     hooks:
       - id: shfmt
         args: [-w, -s, -i, "4"] # write changes, simplify code, 4-space indent
@@ -64,6 +64,6 @@ repos:
 
   # Prettier — multi-language formatting
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: "v3.9.6"
+    rev: "v3.9.9"
     hooks:
       - id: prettier
