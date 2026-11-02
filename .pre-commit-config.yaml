@@ -43,7 +43,7 @@ repos:
 
   # Ruff — Python linting & formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.10
+    rev: v0.17.3
     hooks:
       - id: ruff-check # linter
         args: [--fix] # auto-fix issues when possible
@@ -64,6 +64,6 @@ repos:
 
   # Prettier — multi-language formatting
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: "v3.9.9"
+    rev: "v3.9.10"
     hooks:
       - id: prettier
